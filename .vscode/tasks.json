@@ -1,0 +1,79 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: g++.exe build active file",
+            "command": "g++",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}.exe",
+                "-std=c++17"
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "compiler: g++"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: g++.exe アクティブなファイルのビルド",
+            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "C:\\msys64\\ucrt64\\bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "デバッガーによって生成されたタスク。"
+        },
+        {
+            "type": "shell",
+            "label": "cl.exe build project",
+            "command": "cl.exe",
+            "args": [
+                "/utf-8",
+                "/Zi",
+                "/EHsc",
+                "/nologo",
+                "/I",
+                "C:\\Users\\Iris\\vcpkg\\installed\\x64-windows\\include", // Eigenなどのインクルードパス
+                "/FeA:\\cpp_work\\main_program.exe", // ★出力ファイル名を固定 (例: main_program.exe)
+                "A:\\cpp_work\\Size-reduce_partial.cpp",// ★Size-reduce_partial.cpp を追加
+                "A:\\cpp_work\\Size-reduce.cpp",
+                "A:\\cpp_work\\Gram_Schmidt.cpp",
+                // 新しくビルドする cpp ファイルをここに加筆する
+                // "${file}",
+            ],
+            "options": {
+                "cwd": "A:\\cpp_work"
+            },
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "group": { // ★これをデフォルトのビルドタスクにする場合
+                 "kind": "build",
+                 "isDefault": true
+            },
+            "detail": "コンパイラ: cl.exe"
+        }
+    ]
+}
