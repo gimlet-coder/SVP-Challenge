@@ -15,7 +15,7 @@ void Gram_Schmidt(const Matrix& B, Matrix& B_star, Matrix& U);
  * @param B [in] 入力となる基底行列 (n x m) 各行が基底ベクトル 変更無し
  * @param B_star [out] 計算された直交基底ベクトルを格納する行列 (n x m)。各行が b_i^*
  * @param U [out] GSO係数 μ_{i,j} (i > j) と対角成分 1 を格納する下三角行列 (n x n),
- *  U(i, j) に μ_{i+1, j+1} (i > j) が格納される (0-based index)
+ *  μ_{i, j} が U(i - 1, j - 1) (i > j) に格納されることに注意 (0-based index)
  */
 
 void Size_reduce_partial(Matrix &B, Matrix &U, const int i,const int j);
@@ -28,3 +28,13 @@ void Size_reduce_partial(Matrix &B, Matrix &U, const int i,const int j);
  * @param i, j [in] 更新対象の行インデックス (0-based) i > j である必要あり 変更無し
  */
 
+void GSOUpdate_LLL_partial(Matrix &U, Vector &B_norm, const int k);
+
+ /**
+  * @brief アルゴリズム6に基づいて k における LLL内のGSO情報を更新する
+  * @param U [in, out] GSO係数行列 mu_{i, j} が U(i - 1, j - 1) に格納されていることに注意
+  *  更新されたGSO係数行列を U に反映させることから関数内で変更する可能性あり
+  * @param B_norm [in, out] GSOベクトルの2乗ノルム B_i = ||b_i*||^2 が B_norm(i - 1) に格納されていることに注意 (0-based index)
+  *  更新されたGSOベクトルの2乗ノルムを B_norm に反映させることから関数内で変更される可能性あり
+  * @param k [in] 交換させるインデックス 2 <= k <= n に注意  変更無し
+  */

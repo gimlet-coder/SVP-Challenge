@@ -2,16 +2,29 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "MSVC C++ Debug",
-            "type": "cppvsdbg",
+            "name": "g++: Debug Project (SVP-Challenge)",
+            // デバッガの種類を g++ (MinGW) 用に変更
+            "type": "cppdbg", 
             "request": "launch",
-            "program": "A:\\cpp_work\\main_program.exe",
+            // ${workspaceFolder} は "A:\Github_SVP\SVP-Challenge" のこと
+            "program": "${workspaceFolder}/svp_solver.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "A:\\cpp_work",
+            "cwd": "${workspaceFolder}",
             "environment": [],
-            "console": "externalTerminal",
-            "preLaunchTask": "cl.exe build project"
+            "console": "integratedTerminal",
+            "MIMode": "gdb",
+            // ★ gdb.exe の場所
+            "miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe", 
+            "setupCommands": [
+                {
+                    "description": "gdb のシギントを有効にする",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            // tasks.json で作成した正しいビルドタスクを指定
+            "preLaunchTask": "g++: Build Project (SVP-Challenge)"
         }
     ]
 }
