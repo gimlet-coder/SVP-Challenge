@@ -41,28 +41,48 @@ C++を用いて、教科書『[格子暗号解読 ―SVPチャレンジ・LWEチ
 * (今後実装する機能...)
 
 ---
-
 ## 5. 実行方法
 
-1.  リポジトリをクローンします。
+本プロジェクトのコンパイルには `Eigen` ライブラリが必要です。
+
+1.  **ライブラリパスの設定 (必須)**
+    プロジェクトルート（`SVP-Challenge` フォルダ直下）にある `Makefile` をテキストエディタで開いてください。
+    
+    `EIGEN_PATH =` で始まる行を見つけ、`=` の右側を、あなたのPC環境（`Eigen` をインストールした場所）に合わせて**必ず書き換えてください。**
+    
+    (設定例: `EIGEN_PATH = E:/UE_5.1/Engine/Source/ThirdParty/Eigen`)
+
+2.  **リポジトリのクローン**
     ```bash
     git clone [https://github.com/gimlet-coder/SVP-Challenge.git](https://github.com/gimlet-coder/SVP-Challenge.git)
     cd SVP-Challenge
     ```
 
-2.  (ここにコンパイル方法を具体的に書いてください)
+3.  **コンパイル**
+    ターミナルで以下のコマンドを実行します。`Makefile` がビルドプロセスを自動化します。
     
-    **コンパイル例:**
+    (WindowsのMinGW環境では `mingw32-make` が正式なコマンド名の場合があります)
     ```bash
-    # (例) g++ を使って全ての .cpp ファイルをコンパイルする場合
-    g++ -std=c++17 -o svp_solver *.cpp
+    # (PowerShellで 'make' のエイリアス設定が完了している場合はこちら)
+    make
+    
+    # もし 'make' が見つからないと言われた場合はこちらを実行してください
+    mingw32-make
     ```
 
-3.  実行します。
+4.  **実行**
+    コンパイルが成功すると、フォルダ内に `svp_solver.exe` が生成されます。
+    以下のコマンドで実行してください。
     ```bash
-    ./svp_solver
+    ./svp_solver.exe
     ```
 
+5.  **クリーンアップ (任意)**
+    生成された実行ファイル (`.exe`) やオブジェクトファイル (`.o`) を削除する場合は、以下のコマンドを実行します。
+    ```bash
+    make clean
+    # (または mingw32-make clean)
+    ```
 ---
 
 ## 6. 今後の課題・TODO

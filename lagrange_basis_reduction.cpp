@@ -14,7 +14,6 @@ using Matrix = Eigen::MatrixXd;
 // 2次元格子 L の基底{b_1, b_2} を Lagrange 基底簡約して返す
 
 Matrix Lag_basis_red(const Matrix& L){
-    const int m = L.cols(); //行列 L の列数を取得して, ベクトルの次元 m として扱う
 
     Matrix Lag_L = L; //Lag_L を L で初期化する 行数がそれぞれ一致しているためシンプルにこれでOK
 
@@ -41,6 +40,7 @@ Matrix Lag_basis_red(const Matrix& L){
     return Lag_L;
 }
 
+#if 0
 int main() {
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
@@ -57,3 +57,5 @@ int main() {
 
     return 0;
 }
+
+#endif

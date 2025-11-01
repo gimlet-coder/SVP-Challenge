@@ -46,6 +46,7 @@ void Size_reduce(Matrix &B, Matrix &U){
     Gram_Schmidt(B, B_star, U);
 }
 
+#if 0
 int main() {
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
@@ -78,3 +79,5 @@ int main() {
 
     return 0;
 }
+
+#endif
