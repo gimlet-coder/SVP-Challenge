@@ -17,7 +17,7 @@
                 "-IE:/UE_5.1/Engine/Source/ThirdParty/Eigen", 
 
                 // --- ビルドするファイル ---
-                // ${workspaceFolder} (あなたの A:\Github_SVP\SVP-Challenge フォルダ)
+                // ${workspaceFolder} (A:\Github_SVP\SVP-Challenge フォルダ)
                 // にある *.cpp ファイルをすべて指定
                 "${workspaceFolder}/*.cpp",
 
@@ -33,7 +33,7 @@
                 "$gcc"
             ],
             "group": {
-                // ★このタスクを「デフォルトのビルドタスク」に設定
+                // このタスクを「デフォルトのビルドタスク」に設定
                 "kind": "build",
                 "isDefault": true
             },
