@@ -62,10 +62,10 @@ C++を用いて、教科書『[格子暗号解読 ―SVPチャレンジ・LWEチ
     
     (WindowsのMinGW環境では `mingw32-make` が正式なコマンド名の場合があります)
     ```bash
-    # (PowerShellで 'make' のエイリアス設定が完了している場合はこちら)
+    # (PowerShellで 'make' のエイリアス設定が完了している場合)
     make
     
-    # もし 'make' が見つからないと言われた場合はこちらを実行してください
+    # 'make' が見つからないと言われた場合
     mingw32-make
     ```
 
