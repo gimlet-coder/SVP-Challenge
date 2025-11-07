@@ -18,7 +18,7 @@ TARGET = svp_solver
 # --- ★ここを自分のファイル構成に合わせて編集★ ---
 # コンパイル対象の .cpp ファイルをすべて列挙
 # (例: main.cpp を追加し、Size-reduce_partial.cpp も追加)
-SRCS =main.cpp Gram_Schmidt.cpp lagrange_basis_reduction.cpp Size-reduce.cpp Size-reduce_partial.cpp GSOUpdate-LLL_partial.cpp LLL.cpp GSOUpdate-DeepLLL_partial.cpp
+SRCS =main.cpp Gram_Schmidt.cpp lagrange_basis_reduction.cpp Size-reduce.cpp Size-reduce_partial.cpp GSOUpdate-LLL_partial.cpp LLL.cpp GSOUpdate-DeepLLL_partial.cpp DeepLLL.cpp
 # --- ★編集ここまで★ ---
 
 # .cpp から .o を生成する
