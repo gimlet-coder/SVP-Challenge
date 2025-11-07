@@ -5,10 +5,8 @@
 #include <numeric>
 #include <Eigen/Dense>
 #include <cmath> // std::round を使うために必要
-// Eigenの型を使いやすく名前を変更した
-using Vector = Eigen::VectorXd;
-using Matrix = Eigen::MatrixXd;
 
+#include "lattice_types.hpp"
 // Eigen::MatrixXd は内部的には double 型
 
 // 2次元格子 L の基底{b_1, b_2} を Lagrange 基底簡約して返す

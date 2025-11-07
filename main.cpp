@@ -11,9 +11,8 @@
 
 #include <windows.h> //　文字化け対策
 
-// Eigenの型を使いやすく名前を変更した
-using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
-using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
+
+#include "lattice_types.hpp"
 
 // Eigen::MatrixXd は内部的には double 型
 
@@ -32,29 +31,13 @@ int main() {
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
 
-    /*
-    std::random_device rd; // 乱数のシード値を取得
-    std::mt19937 gen(rd()); //MT法に基づいた乱数エンジン
+     Eigen::MatrixXi B_int(4, 4);
 
-    int min_val = 10'000'000, max_val = 100'000'000; // 10^7 ~ 10^8 と指定
-
-    std::uniform_int_distribution<int> dist(min_val, max_val); // 10^7~10^8 のランダムな整数を生成する関数
+    B_int << 84,  3, 34, 17,
+             20, 48, 66, 19,
+             69, 14, 63, 78,
+             28, 72, 36, 57;
     
-    Eigen::MatrixXi B_int(20, 20);
-
-    B_int.setZero(); // B の初期化
-    for (int i = 0; i < 20; i++){
-        B_int(i, i) = 1;
-        B_int(i, 0) = dist(gen);
-    }
-    */
-
-    Eigen::MatrixXi B_int(3, 3);
-
-    B_int << 9, 2, 7,
-             8, 6, 1,
-             3, 2, 6;
-
     std::cout << "入力した基底行列 B:\n" << B_int << std::endl << std::endl;
     double delta = 0.75;
 

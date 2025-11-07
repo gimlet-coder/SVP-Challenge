@@ -7,9 +7,7 @@
 #include <cmath> 
 #include <stdexcept> 
 
-// Eigenの型を long double に切り替える
-using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
-using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
+#include "lattice_types.hpp"
 
 
 void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const int k_in){

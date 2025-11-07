@@ -7,11 +7,8 @@
 #include <cmath> // std::fabs() (絶対値の計算) std::round() に用いる 
 #include <stdexcept> // std::out_of_range のために必要
 
-// Eigenの型を long double に切り替える
-using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
-using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
+#include "lattice_types.hpp"
 
-// Eigen::MatrixXd は内部的には double 型
 
 /*memo:
         B.row(i) 行列 B の i 番目の行をひとつの行ベクトルとして取り出す

@@ -7,9 +7,7 @@
 #include <cmath> // std::fabs() (絶対値の計算) std::round() に用いる 
 #include <stdexcept> // std::out_of_range のために必要
 
-// Eigenの型を使いやすく名前を変更した
-using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
-using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
+#include "lattice_types.hpp"
 
 // Eigen::MatrixXd は内部的には double 型
 
@@ -45,12 +43,12 @@ void DeepLLL(Matrix &B, const double delta){
         for (int j = k_idx - 1; j >= 0; j--){
             Size_reduce_partial(B, U, k_idx, j);
         }
-        double C = B_norm(k_idx);
-        C = B.row(k_idx).squaredNorm();
+        long double C = B.row(k_idx).squaredNorm();
+        long double delta_ld = static_cast<long double>(delta);
         int i_idx = 0;
         while (i_idx < k_idx){
             C -= U(k_idx, i_idx) * U(k_idx, i_idx) * B_norm(i_idx);
-            if(C >= delta * B_norm(i_idx)){
+            if(C >= delta_ld * B_norm(i_idx + 1)){
                 i_idx++;
             }else{
                 Vector temp = B.row(k_idx);
@@ -68,5 +66,4 @@ void DeepLLL(Matrix &B, const double delta){
             k_idx++;
         }
     }
-
 }

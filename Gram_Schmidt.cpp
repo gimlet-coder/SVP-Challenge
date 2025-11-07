@@ -5,11 +5,8 @@
 #include <numeric>
 #include <Eigen/Dense>
 
-// Eigenの型を使いやすく名前を変更した
-using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
-using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
+#include "lattice_types.hpp"
 
-// Eigen::MatrixXd は内部的には double 型
 
     /* const Matrix& B 入力用の行列だから中身も変えないしコピーも作らない */
     /* Matrix& B_star 出力用の行列 計算後のGSOベクトルを書き込むから const はつけない */
@@ -34,13 +31,11 @@ void Gram_Schmidt(const Matrix& B, Matrix& B_star, Matrix& U){
     for (int i = 0; i < n; i++){
         B_star.row(i) = B.row(i); //b_i^* を b_i で初期化する
         for (int j = 0; j < i; j++){
-            double mu = B.row(i).dot(B_star.row(j)) / B_star.row(j).squaredNorm(); // これが μ_(i, j)
+            long double mu = B_star.row(i).dot(B_star.row(j)) / B_star.row(j).squaredNorm(); // これが μ_(i, j)
             U(i, j) = mu; // 計算した μ_(i, j) を U に保存する
+            B_star.row(i) -= mu * B_star.row(j);
         }
-        for (int j = 0; j < i; j++){
-            B_star.row(i) -= U(i, j) * B_star.row(j);
-        }
-        U(i, i) = 1.0; // GSO係数行列 U の対角成分は 1 となる
+        U(i, i) = 1.0L; // GSO係数行列 U の対角成分は 1 となる
     }
 }
 
