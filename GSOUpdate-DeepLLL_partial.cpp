@@ -11,7 +11,7 @@
 using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
 using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
 
-// DeepLLLのGSO更新 (アルゴリズム8のロジックに忠実な最終修正案)
+
 void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const int k_in){
     int n = U.rows();
     if(i_in < 1 || k_in <= i_in || n < k_in ){
