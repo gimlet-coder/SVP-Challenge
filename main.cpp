@@ -14,7 +14,7 @@
 
 #include "lattice_types.hpp"
 
-// Eigen::MatrixXd は内部的には double 型
+
 
 /*memo:
 B.row(i) 行列 B の i 番目の行をひとつの行ベクトルとして取り出す
