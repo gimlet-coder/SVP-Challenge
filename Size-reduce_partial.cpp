@@ -19,7 +19,7 @@
 */
 
 #include "Size-reduce_partial.hpp"
-
+// 上記のヘッダーによって Vector と Matrix は long double 型になっている
 
 void Size_reduce_partial(Matrix &B, Matrix &U, const int i,const int j){
     // red_B と red_U を出力したい → B と U を更新して入出力両方に用いる

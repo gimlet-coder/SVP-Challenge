@@ -7,7 +7,7 @@
 #include <cmath> // std::round を使うために必要
 
 #include "lattice_types.hpp"
-
+// 上記のヘッダーによって Vector と Matrix は long double 型になっている
 
 // 2次元格子 L の基底{b_1, b_2} を Lagrange 基底簡約して返す
 

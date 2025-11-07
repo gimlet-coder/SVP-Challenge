@@ -8,7 +8,7 @@
 #include <stdexcept> 
 
 #include "lattice_types.hpp"
-
+// 上記のヘッダーによって Vector と Matrix は long double 型になっている
 
 void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const int k_in){
     int n = U.rows();

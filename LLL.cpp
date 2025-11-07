@@ -8,7 +8,7 @@
 #include <stdexcept> // std::out_of_range のために必要
 
 #include "lattice_types.hpp"
-
+// 上記のヘッダーによって Vector と Matrix は long double 型になっている
 
 /*memo:
 B.row(i) 行列 B の i 番目の行をひとつの行ベクトルとして取り出す

@@ -13,7 +13,7 @@
 
 
 #include "lattice_types.hpp"
-
+// 上記のヘッダーによって Vector と Matrix は long double 型になっている
 
 
 /*memo:

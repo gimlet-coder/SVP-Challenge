@@ -6,7 +6,7 @@
 #include <Eigen/Dense>
 
 #include "lattice_types.hpp"
-
+// 上記のヘッダーによって Vector と Matrix は long double 型になっている
 
     /* const Matrix& B 入力用の行列だから中身も変えないしコピーも作らない */
     /* Matrix& B_star 出力用の行列 計算後のGSOベクトルを書き込むから const はつけない */
