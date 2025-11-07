@@ -12,8 +12,8 @@
 #include <windows.h> //　文字化け対策
 
 // Eigenの型を使いやすく名前を変更した
-using Vector = Eigen::VectorXd;
-using Matrix = Eigen::MatrixXd;
+using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
+using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
 
 // Eigen::MatrixXd は内部的には double 型
 
@@ -27,6 +27,56 @@ hoge.squaredNorm() はベクトルの長さの2乗を表す
 
 #include "main.hpp"
 
+int main() {
+    SetConsoleOutputCP(65001); // このコードの出力文字コードを UTF-8 に強制
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(NULL);
+
+    /*
+    std::random_device rd; // 乱数のシード値を取得
+    std::mt19937 gen(rd()); //MT法に基づいた乱数エンジン
+
+    int min_val = 10'000'000, max_val = 100'000'000; // 10^7 ~ 10^8 と指定
+
+    std::uniform_int_distribution<int> dist(min_val, max_val); // 10^7~10^8 のランダムな整数を生成する関数
+    
+    Eigen::MatrixXi B_int(20, 20);
+
+    B_int.setZero(); // B の初期化
+    for (int i = 0; i < 20; i++){
+        B_int(i, i) = 1;
+        B_int(i, 0) = dist(gen);
+    }
+    */
+
+    Eigen::MatrixXi B_int(3, 3);
+
+    B_int << 9, 2, 7,
+             8, 6, 1,
+             3, 2, 6;
+
+    std::cout << "入力した基底行列 B:\n" << B_int << std::endl << std::endl;
+    double delta = 0.75;
+
+    Matrix B_long_double = B_int.cast<long double>(); 
+    try{
+        DeepLLL(B_long_double, delta);
+
+        B_int = B_long_double.array().round().cast<int>(); // round で数値誤差を丸めて int にキャストして値を戻す
+
+        std::cout << "簡約パラメータ delta = " << delta << " によってDeepLLL基底簡約した B:\n" << B_long_double << std::endl << std::endl;
+    }
+    catch(const std::out_of_range &orr){
+        std::cerr << orr.what() << std::endl;
+        return 1; // エラー終了
+    }
+    return 0;
+}
+
+
+
+
+#if 0
 // LLL の動作確認
 int main() {
     SetConsoleOutputCP(65001); // このコードの出力文字コードを UTF-8 に強制
@@ -65,3 +115,5 @@ int main() {
     }
     return 0;
 }
+
+#endif

@@ -8,8 +8,8 @@
 #include <stdexcept> // std::out_of_range のために必要
 
 // Eigenの型を使いやすく名前を変更した
-using Vector = Eigen::VectorXd;
-using Matrix = Eigen::MatrixXd;
+using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
+using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
 
 // Eigen::MatrixXd は内部的には double 型
 
@@ -24,7 +24,7 @@ hoge.squaredNorm() はベクトルの長さの2乗を表す
 
 void DeepLLL(Matrix &B, const double delta){
     if(delta <= 0.25 || 1 <= delta){
-        throw std::out_of_range("Size_reduce: 不正なインデックス δ です");
+        throw std::out_of_range("Size_reduce: 不正なパラメータ δ です");
     }
     /* --- 引数チェック完了 --- */
 
@@ -45,11 +45,12 @@ void DeepLLL(Matrix &B, const double delta){
         for (int j = k_idx - 1; j >= 0; j--){
             Size_reduce_partial(B, U, k_idx, j);
         }
-        double C = B.row(k_idx).squaredNorm();
+        double C = B_norm(k_idx);
+        C = B.row(k_idx).squaredNorm();
         int i_idx = 0;
         while (i_idx < k_idx){
+            C -= U(k_idx, i_idx) * U(k_idx, i_idx) * B_norm(i_idx);
             if(C >= delta * B_norm(i_idx)){
-                C -= U(k_idx, i_idx) * U(k_idx, i_idx) * B_norm(i_idx);
                 i_idx++;
             }else{
                 Vector temp = B.row(k_idx);

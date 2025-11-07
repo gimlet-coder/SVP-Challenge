@@ -7,9 +7,9 @@
 #include <cmath> // std::fabs() (絶対値の計算) std::round() に用いる 
 #include <stdexcept> // std::out_of_range のために必要
 
-// Eigenの型を使いやすく名前を変更した
-using Vector = Eigen::VectorXd;
-using Matrix = Eigen::MatrixXd;
+// Eigenの型を long double に切り替える
+using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
+using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
 
 // Eigen::MatrixXd は内部的には double 型
 
@@ -39,10 +39,10 @@ void Size_reduce_partial(Matrix &B, Matrix &U, const int i,const int j){
     // --- ここまで引数が条件を満たしているかの確認 ---
 
     if(std::fabs(U(i, j)) > 0.5){
-        double mu_ij = U(i, j);
-        double q_double = std::round(mu_ij); // GSO係数の更新をするために double で q を計算する
+        long double mu_ij = U(i, j);
+        long double q_double = std::round(mu_ij); // GSO係数の更新をするために double で q を計算する
         long long q_int = static_cast<long long>(q_double); // 基底ベクトルの更新用に long long (整数型) で q を計算
-        B.row(i) -= q_int*B.row(j);
+        B.row(i) -= static_cast<long double>(q_int) * B.row(j);
 
         for (int l = 0; l < j; l++){
             U(i, l) -= q_double*U(j, l);

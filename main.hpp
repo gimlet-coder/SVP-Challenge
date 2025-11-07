@@ -4,8 +4,8 @@
 // Eigenのコア機能とDenseモジュール（VectorXd, MatrixXdなど）を使うために必要
 #include <Eigen/Dense>
 
-using Vector = Eigen::VectorXd;
-using Matrix = Eigen::MatrixXd;
+using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
+using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
 
 // --- 関数の宣言 (プロトタイプ) ---
 
@@ -43,6 +43,16 @@ void LLL(Matrix &B, const double delta);
 
 /**
  * @brief LLL基底簡約アルゴリズム
- * @param B[in, out] n次元格子Lの基底 B 最後に delta に関する LLL簡約基底 B として返すため変更あり
+ * @param B [in, out] n次元格子 L の基底 B
+ *  最後に delta に関する LLL簡約基底 B として返すため変更あり
  * @param delta [in] LLLにおける簡約パラメータ 変更無し
+ */
+
+void DeepLLL(Matrix &B, const double delta);
+
+/**
+ * @brief DeepLLL基底簡約アルゴリズム
+ * @param B [in, out] n次元格子 L の基底 B
+ *  最後に delta に関する DeepLLL簡約基底 B として返すため変更あり
+ * @param delta [in] DeepLLLにおける簡約パラメータ 変更無し
  */

@@ -8,8 +8,8 @@
 #include <stdexcept> // std::out_of_range のために必要
 
 // Eigenの型を使いやすく名前を変更した
-using Vector = Eigen::VectorXd;
-using Matrix = Eigen::MatrixXd;
+using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
+using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
 
 // Eigen::MatrixXd は内部的には double 型
 

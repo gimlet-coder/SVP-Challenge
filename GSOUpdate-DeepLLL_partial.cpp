@@ -4,70 +4,80 @@
 #include <algorithm>
 #include <numeric>
 #include <Eigen/Dense>
-#include <cmath> // std::fabs() (絶対値の計算) std::round() に用いる 
-#include <stdexcept> // std::out_of_range のために必要
+#include <cmath> 
+#include <stdexcept> 
 
-// Eigenの型を使いやすく名前を変更した
-using Vector = Eigen::VectorXd;
-using Matrix = Eigen::MatrixXd;
+// Eigenの型を long double に切り替える
+using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
+using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
 
-// Eigen::MatrixXd は内部的には double 型
-
-/*memo:
-B.row(i) 行列 B の i 番目の行をひとつの行ベクトルとして取り出す
-B.col(j) 行列 B の j 番目の列をひとつの列ベクトルとして取り出す
-hoge.dot(huga) は hoge と huga の内積を表す
-hoge.squaredNorm() はベクトルの長さの2乗を表す
-*/
-
+// DeepLLLのGSO更新 (アルゴリズム8のロジックに忠実な最終修正案)
 void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const int k_in){
     int n = U.rows();
-    /*--- i と k の引数チェック --- */
     if(i_in < 1 || k_in <= i_in || n < k_in ){
-        throw std::out_of_range("Size_reduce: 不正なインデックス i または k です");
+        throw std::out_of_range("GSOUpdate_DeepLLL_partial: 不正なインデックス i または k です");
     }
-    /* --- 引数チェック完了 --- */
-
-    Vector P = B_norm, D = B_norm;
+    const int i = i_in - 1, k = k_in - 1; 
     
-    const int i = i_in - 1, k = k_in - 1; // 0-index と 1-index の混同を防ぐためにずらした
+    // P, D ベクトルの計算に必要な初期化
+    Vector P(n), D(n); 
 
-    for (int j = k - 1; j >= i - 1; j--){
-        P(j) = U(k, j) * B_norm(j);
-        D(j) = D(j + 1) + U(k, j) * P(j);
-    }
-    Vector S(n);
-    S.setZero(); // 初期化 アルゴリズムの6行目の処理
-
+    D(k) = B_norm(k);
+    
     for (int j = k - 1; j >= i; j--){
-        double T = U(k, j - 1) / D(j);
+        P(j) = U(k, j) * B_norm(j); // P_j = mu_k,j * B_j
+        D(j) = D(j + 1) + U(k, j) * P(j); // D_j = ||pi_j(b_k)||^2
+    }
+    
+    Vector S(n);
+    S.setZero(); 
+
+    // mu_l,j の更新 (j > i)
+    for (int j = k; j >= i + 1; j--){
+        // T = mu_k,j-1 / D_j。 Deep Insertion前は mu_k,j-1 は存在しないので 0
+        long double T = 0.0L;
+        if(j - 1 >= 0) {
+            T = U(k, j - 1) / D(j);
+        }
+        
+        // l > k の更新
         for (int l = n - 1; l >= k + 1; l--){
             S(l) += U(l, j) * P(j);
             U(l, j) = U(l, j - 1) - T * S(l);
         }
-        for (int l = k - 1; l >= j + 1; l--){
+        
+        // k >= l > j の更新
+        for (int l = k; l >= j + 1; l--){
             S(l) += U(l - 1, j) * P(j);
             U(l, j) = U(l - 1, j - 1) - T * S(l);
         }
     }
-    double T = 1.0/D(i);
-/* ここまででアルゴリズムの 16行目の処理 */
+    
+    // mu_l,i の更新 (補題 2.4.3(2))
+    long double T_div_D_i = 1.0 / D(i);
+
+    // l > k の更新
     for (int l = n - 1; l >= k + 1; l--){
-        U(l, i) = T * (S(l) + U(l, i) * P(i - 1));
+        U(l, i) = T_div_D_i * (S(l) + U(l, i) * P(i)); 
     }
-    for (int l = k - 1; l >= i + 1; l--){
-        U(l, i) = T * (S(l) + U(l - 1, i) * P(i - 1));
+    
+    // k >= l > i の更新
+    for (int l = k; l >= i + 1; l--){
+        U(l, i) = T_div_D_i * (S(l) + U(l - 1, i) * P(i)); 
     }
-    U(i, i - 1) = T * P(i - 1);
-    for (int j = 0; j <= i - 2; j++){
+    
+    // mu_l,j のシフト (j < i)
+    for (int j = 0; j <= i - 1; j++){
         double temp = U(k, j);
-        for (int l = k - 1; l >= i; l--){
-            U(l + 1, j) = U(l, j);
+        for (int l = k; l >= i + 1; l--){
+            U(l, j) = U(l - 1, j);
         }
         U(i, j) = temp;
     }
-    for (int j = k - 1; j >= i; j--){
+    
+    // B_norm の更新 (補題 2.4.2)
+    for (int j = k; j >= i + 1; j--){
         B_norm(j) = D(j) * B_norm(j - 1) / D(j - 1);
     }
-    B_norm(i - 1) = D(i - 1);
+    B_norm(i) = D(i);
 }

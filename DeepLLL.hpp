@@ -4,8 +4,8 @@
 // Eigenのコア機能とDenseモジュール（VectorXd, MatrixXdなど）を使うために必要
 #include <Eigen/Dense>
 
-using Vector = Eigen::VectorXd;
-using Matrix = Eigen::MatrixXd;
+using Vector = Eigen::Matrix<long double, Eigen::Dynamic, 1>;
+using Matrix = Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
 
 // --- 関数の宣言 (プロトタイプ) ---
 
