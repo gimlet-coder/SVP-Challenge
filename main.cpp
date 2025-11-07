@@ -36,9 +36,9 @@ int main() {
     std::random_device rd; // 乱数のシード値を取得
     std::mt19937 gen(rd()); //MT法に基づいた乱数エンジン
 
-    int min_val = 10'000'000, max_val = 100'000'000; // 10~7 ~ 10^8 と指定
+    int min_val = 10'000'000, max_val = 100'000'000; // 10^7 ~ 10^8 と指定
 
-    std::uniform_int_distribution<int> dist(min_val, max_val);
+    std::uniform_int_distribution<int> dist(min_val, max_val); // 10^7~10^8 のランダムな整数を生成する関数
     
     Eigen::MatrixXi B_int(20, 20);
 
