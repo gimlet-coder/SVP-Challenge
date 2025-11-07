@@ -25,30 +25,31 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
     int n = U.rows();
     const int i = i_in - 1, k = k_in - 1; // 0-index と 1-index の混同を防ぐためにずらした
 
-    for (int j = k - 1; j >= i; j--){
+    for (int j = k - 1; j >= i - 1; j--){
         P(j) = U(k, j) * B_norm(j);
         D(j) = D(j + 1) + U(k, j) * P(j);
     }
     Vector S(n);
     S.setZero(); // 初期化 アルゴリズムの6行目の処理
-    for (int j = k; j >= i + 1; j--){
+
+    for (int j = k - 1; j >= i; j--){
         double T = U(k, j - 1) / D(j);
         for (int l = n - 1; l >= k + 1; l--){
-            S(l) += U(l, j - 1) * P(j - 1);
-            U(l, j - 1) = U(l, j - 2) - T * S(l);
+            S(l) += U(l, j) * P(j);
+            U(l, j) = U(l, j - 1) - T * S(l);
         }
-        for (int l = k - 1; l >= j; l--){
-            S(l) += U(l - 1, j - 1) * P(j - 1);
-            U(l, j - 1) = U(l - 1, j - 2) - T * S(l);
+        for (int l = k - 1; l >= j + 1; l--){
+            S(l) += U(l - 1, j) * P(j);
+            U(l, j) = U(l - 1, j - 1) - T * S(l);
         }
     }
     double T = 1.0/D(i);
-/* ここまでで alg.16 */
+/* ここまででアルゴリズムの 16行目の処理 */
     for (int l = n - 1; l >= k + 1; l--){
-        U(l, i) = T * (S(l) + U(l, i) * P(i));
+        U(l, i) = T * (S(l) + U(l, i) * P(i - 1));
     }
     for (int l = k - 1; l >= i + 1; l--){
-        U(l, i) = T * (S(l) + U(l - 1, i) * P(i));
+        U(l, i) = T * (S(l) + U(l - 1, i) * P(i - 1));
     }
     U(i, i - 1) = T * P(i - 1);
     for (int j = 0; j <= i - 2; j++){
@@ -61,5 +62,5 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
     for (int j = k - 1; j >= i; j--){
         B_norm(j) = D(j) * B_norm(j - 1) / D(j - 1);
     }
-    B_norm(i) = D(i);
+    B_norm(i - 1) = D(i - 1);
 }
