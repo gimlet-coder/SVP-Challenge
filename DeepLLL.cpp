@@ -38,7 +38,10 @@ void DeepLLL(Matrix &B, const double delta){
 
     int k_idx = 1;
 
+    
+
     while(k_idx < n){
+        bool FLAG = false;
         for (int j = k_idx - 1; j >= 0; j--){
             Size_reduce_partial(B, U, k_idx, j);
         }
@@ -56,9 +59,13 @@ void DeepLLL(Matrix &B, const double delta){
                 B.row(i_idx) = temp;
                 GSOUpdate_DeepLLL_partial(U, B_norm, i_idx + 1, k_idx + 1); // この関数の i, k に当たるものは 1-index であることに注意する
                 k_idx = std::max(i_idx, 1);
+                FLAG = true;
+                break;
             }
         }
-        k_idx++;
+        if(!FLAG){
+            k_idx++;
+        }
     }
 
 }
