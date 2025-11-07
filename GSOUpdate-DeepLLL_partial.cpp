@@ -21,8 +21,15 @@ hoge.squaredNorm() はベクトルの長さの2乗を表す
 */
 
 void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const int k_in){
-    Vector P = B_norm, D = B_norm;
     int n = U.rows();
+    /*--- i と k の引数チェック --- */
+    if(i_in < 1 || k_in <= i_in || n < k_in ){
+        throw std::out_of_range("Size_reduce: 不正なインデックス i または k です");
+    }
+    /* --- 引数チェック完了 --- */
+
+    Vector P = B_norm, D = B_norm;
+    
     const int i = i_in - 1, k = k_in - 1; // 0-index と 1-index の混同を防ぐためにずらした
 
     for (int j = k - 1; j >= i - 1; j--){
