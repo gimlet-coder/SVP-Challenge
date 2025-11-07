@@ -49,11 +49,11 @@ void DeepLLL(Matrix &B, const double delta){
                 C -= U(k_idx, i_idx) * U(k_idx, i_idx) * B_norm(i_idx);
                 i_idx++;
             }else{
+                Vector temp = B.row(k_idx);
                 for (int j = k_idx; j >= i_idx + 1; j--){
-                    Vector temp = B.row(k_idx);
-                    B.row(j) = B.row(j - 1);
-                    B.row(i_idx) = temp;
+                    B.row(j) = B.row(j - 1);                    
                 }
+                B.row(i_idx) = temp;
                 GSOUpdate_DeepLLL_partial(U, B_norm, i_idx + 1, k_idx + 1); // この関数の i, k に当たるものは 1-index であることに注意する
                 k_idx = std::max(i_idx, 1);
             }
