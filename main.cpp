@@ -48,6 +48,13 @@ int main() {
         B_int = B_long_double.array().round().cast<int>(); // round で数値誤差を丸めて int にキャストして値を戻す
 
         std::cout << "簡約パラメータ delta = " << delta << " によってDeepLLL基底簡約した B:\n" << B_long_double << std::endl << std::endl;
+
+        //LLLと比較してみた
+        B_long_double = B_int.cast<long double>(); 
+        LLL(B_long_double, delta);
+        B_int = B_long_double.array().round().cast<int>(); // round で数値誤差を丸めて int にキャストして値を戻す
+
+        std::cout << "簡約パラメータ delta = " << delta << " によってLLL基底簡約した B:\n" << B_long_double << std::endl << std::endl;
     }
     catch(const std::out_of_range &orr){
         std::cerr << orr.what() << std::endl;
