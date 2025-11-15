@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -8,17 +8,11 @@
 #include <stdexcept> // std::out_of_range のために必要
 
 #include "lattice_types.hpp"
-// 上記のヘッダーによって Vector と Matrix は long double 型になっている
-
-/*memo:
-B.row(i) 行列 B の i 番目の行をひとつの行ベクトルとして取り出す
-B.col(j) 行列 B の j 番目の列をひとつの列ベクトルとして取り出す
-hoge.dot(huga) は hoge と huga の内積を表す
-hoge.squaredNorm() はベクトルの長さの2乗を表す
-*/
+// 上記のヘッダーによって Vector と Matrix は Scalar 型になっている
 
 #include "Size-reduce.hpp"
 
+// アルゴリズム 4: Size-reduce (完全なサイズ簡約)
 void Size_reduce(Matrix &B, Matrix &U){
     const int n = B.rows(); // 行列 B の行数を取得して, ベクトルの本数 n として扱う
     if (n < 2){ // 基底ベクトルが1本以下の場合
@@ -35,46 +29,13 @@ void Size_reduce(Matrix &B, Matrix &U){
     Matrix loop_U; // ループ内で用いる一時的なGSO係数行列
     Gram_Schmidt(B, B_star, loop_U);
     
+    // ステップ 2-6: すべての 2 <= i <= n, 1 <= j < i に対して Size-reduce_partial を適用
     for (int i = 1; i < n; i++){
         for (int j = i - 1; j >= 0; j--){
             Size_reduce_partial(B, loop_U, i, j);
         }
     }
+    // Size_reduce_partial では GSOベクトル B_star は変化しないが、最終的な U の値は更新された B に対して再計算する必要がある
+    // (B_star が必要ないなら、Gram_Schmidt を呼び出すことで U を更新するだけでOK)
     Gram_Schmidt(B, B_star, U);
 }
-
-#if 0
-int main() {
-    std::ios_base::sync_with_stdio(false);
-    std::cin.tie(NULL);
-
-    Matrix B(3, 3);
-    B << 5, -3, -7,
-         2, -7, -7,
-         3, -10, 0;
-
-    std::cout << "元の基底行列 B:\n" << B << std::endl << std::endl;
-
-    Matrix U_result;
-
-    try{
-        Size_reduce(B, U_result);
-
-        std::cout << "--- サイズ簡約後の基底行列 B ---" << std::endl;
-        std::cout << B << std::endl;
-
-        std::cout << "\n--- 対応する GSO 係数行列 U ---" << std::endl;
-        std::cout << U_result << std::endl;
-
-    } catch (const std::out_of_range& oor) {
-        std::cerr << "エラーが発生しました (範囲外アクセス): " << oor.what() << std::endl;
-        return 1; // エラー終了
-    } catch (const std::exception& e) {
-        std::cerr << "予期せぬエラーが発生しました: " << e.what() << std::endl;
-        return 1; // エラー終了
-    }
-
-    return 0;
-}
-
-#endif

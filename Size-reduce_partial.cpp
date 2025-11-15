@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -9,88 +9,50 @@
 
 #include "lattice_types.hpp"
 
-
-/*memo:
-        B.row(i) 行列 B の i 番目の行をひとつの行ベクトルとして取り出す
-        B.col(j) 行列 B の j 番目の列をひとつの列ベクトルとして取り出す
-
-        hoge.dot(huga) は hoge と huga の内積を表す
-        hoge.squaredNorm() はベクトルの長さの2乗を表す
-*/
-
 #include "Size-reduce_partial.hpp"
-// 上記のヘッダーによって Vector と Matrix は long double 型になっている
+// 上記のヘッダーによって Vector と Matrix は Scalar 型になっている
 
-void Size_reduce_partial(Matrix &B, Matrix &U, const int i,const int j){
+void Size_reduce_partial(Matrix &B, Matrix &U, const int i_in,const int j_in){
     // red_B と red_U を出力したい → B と U を更新して入出力両方に用いる
 
     //i, j が 1 <= j < i <= n を満たしているか確認
-    if (i <= j || i < 0 || j < 0 || i >= B.rows() || j >= B.rows()) {
+    if (i_in <= j_in || i_in < 0 || j_in < 0 || i_in >= B.rows() || j_in >= B.rows()) {
         throw std::out_of_range("Size_reduce: 不正なインデックス i または j です.");
     }
     // U(j,l) にアクセスするため U.rows() もチェックする
-    if (i >= U.rows() || j >= U.cols() || j >= U.rows()) { 
+    if (i_in >= U.rows() || j_in >= U.cols() || j_in >= U.rows()) { 
          throw std::out_of_range("Size_reduce: U行列に対するインデックスが範囲外です。");
     }
 
     // --- ここまで引数が条件を満たしているかの確認 ---
+    const int i = i_in, j = j_in; // 0-based index
 
-    if(std::fabs(U(i, j)) > 0.5){
-        long double mu_ij = U(i, j);
-        long double q_double = std::round(mu_ij); // GSO係数の更新をするために double で q を計算する
-        long long q_int = static_cast<long long>(q_double); // 基底ベクトルの更新用に long long (整数型) で q を計算
-        B.row(i) -= static_cast<long double>(q_int) * B.row(j);
+    long double mu_ij_ld = U(i, j).convert_to<long double>();
 
+    if(std::fabs(mu_ij_ld) > 0.5){ 
+        
+        // --- ステップ 2: q = [mu_{i,j}] を計算 ---
+        long double q_ld = std::round(mu_ij_ld);
+        // q は整数係数 (Scalar) で定義
+        Scalar q = static_cast<Scalar>(q_ld); 
+        
+        // --- ステップ 2: 基底ベクトル更新: b_i <- b_i - q * b_j (Scalar (多倍長整数) 演算) ---
+        B.row(i) -= q * B.row(j);
+        
+        // --- ステップ 4: GSO係数 mu_{i,l} の更新: mu_{i,l} <- mu_{i,l} - q * mu_{j,l} ---
         for (int l = 0; l < j; l++){
-            U(i, l) -= q_double*U(j, l);
+            // U の要素を long double で計算し、Scalar に戻す
+            long double U_il_ld = U(i, l).convert_to<long double>();
+            long double U_jl_ld = U(j, l).convert_to<long double>();
+            
+            long double result_ld = U_il_ld - q_ld * U_jl_ld;
+            U(i, l) = static_cast<Scalar>(result_ld);
         }
-        U(i, j) -= q_double;
+        
+        // --- U(i, j) の更新: mu_{i,j} <- mu_{i,j} - q ---
+        // (この時点での U(i, j) の値は、更新された b_i に対応する新しい mu_{i,j} の値)
+        long double U_ij_ld = U(i, j).convert_to<long double>();
+        U_ij_ld -= q_ld; 
+        U(i, j) = static_cast<Scalar>(U_ij_ld); 
     }
 }
-
-#if 0
-
-int main() {
-    std::ios_base::sync_with_stdio(false);
-    std::cin.tie(NULL);
-    
-    Matrix B(3, 3);
-    B << 5, -3, -7,
-         2, -7, -7,
-         3, -10, 0;
-
-    Matrix B_star;
-    Matrix U;
-
-    // それぞれ, Gram_Schmidt と Size-reduce の受け皿を用意
-
-    try{ // エラーが発生しうる箇所を try で計算する
-        Gram_Schmidt(B, B_star, U); // GSOを計算
-
-        std::cout << "元の基底行列 B:\n" << B << std::endl << std::endl;
-        std::cout << "GSO係数行列 U:\n" << U << std::endl << std::endl;
-
-        int i_idx = 1, j_idx = 0;
-        std::cout << "--- Size_reduce(i=" << i_idx << ", j=" << j_idx << ") を呼び出し ---" << std::endl;
-        Size_reduce_partial(B, U, i_idx, j_idx);
-        std::cout << "簡約後の基底行列 red_B:\n" << B << std::endl << std::endl;
-        std::cout << "簡約後の係数行列 red_U:\n" << U << std::endl << std::endl;
-
-    }catch (const std::out_of_range& oor) { // 範囲外エラー (out_of_range) が発生した場合
-        std::cerr << "エラーが発生しました (範囲外アクセス): " << oor.what() << std::endl;
-        return 1; // エラー終了
-    } catch (const std::exception& e) { // その他の標準的なエラーが発生した場合
-        std::cerr << "予期せぬエラーが発生しました: " << e.what() << std::endl;
-        return 1; // エラー終了
-    }
-    /* memo:
-        std::cerr エラーメッセージを表示する専門　(std::cout は通常のプログラムの出力)
-        orr.what(), e.what() それぞれが表示するエラーメッセージの内容
-    
-    */
-
-    return 0;
-}
-
-#endif
-

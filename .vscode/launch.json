@@ -12,10 +12,9 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "console": "integratedTerminal",
             "MIMode": "gdb",
             // ★ gdb.exe の場所
-            "miDebuggerPath": "C:\\msys64\\ucrt64\\bin\\gdb.exe", 
+            "miDebuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe",
             "setupCommands": [
                 {
                     "description": "gdb のシギントを有効にする",

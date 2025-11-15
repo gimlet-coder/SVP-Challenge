@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // --- 必要なヘッダーファイル ---
 // Eigenのコア機能とDenseモジュール（VectorXd, MatrixXdなど）を使うために必要

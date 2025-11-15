@@ -4,40 +4,23 @@
         {
             "type": "shell",
             "label": "g++: Build Project (SVP-Challenge)",
-            "command": "g++",
-            "args": [
-                // --- 基本設定 ---
-                "-std=c++17",       // C++17 を使用
-                "-Wall",            // 警告をすべて有効にする
-                "-g",               // ★デバッグ情報を付加 (F5に必須)
-                "-fdiagnostics-color=always",
-
-                // --- ライブラリの場所 (Eigen) ---
-                // makeコマンドから引用
-                "-IE:/UE_5.1/Engine/Source/ThirdParty/Eigen", 
-
-                // --- ビルドするファイル ---
-                // ${workspaceFolder} (A:\Github_SVP\SVP-Challenge フォルダ)
-                // にある *.cpp ファイルをすべて指定
-                "${workspaceFolder}/*.cpp",
-
-                // --- 出力ファイル ---
-                "-o",
-                "${workspaceFolder}/svp_solver.exe" // svp_solver.exe として出力
-            ],
+            "command": "mingw32-make", 
+            "args": [], 
             "options": {
-                // コマンドを実行する場所
-                "cwd": "${workspaceFolder}"
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    // MinGW の bin フォルダへのパスを追加
+                    "PATH": "C:/msys64/mingw64/bin:${env:PATH}"
+                }
             },
             "problemMatcher": [
                 "$gcc"
             ],
             "group": {
-                // このタスクを「デフォルトのビルドタスク」に設定
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Compiler: g++ (SVP-Challenge プロジェクト全体をビルド)"
+            "detail": "Compiler: mingw32-make (プロジェクト全体のビルド)"
         }
     ]
 }

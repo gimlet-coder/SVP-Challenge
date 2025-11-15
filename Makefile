@@ -6,11 +6,15 @@ CXXFLAGS = -std=c++17 -Wall -g
 
 # --- ★ここを自分の環境に合わせて編集★ ---
 # Eigenライブラリのヘッダがある "親" フォルダへのパス
-EIGEN_PATH = E:/UE_5.1/Engine/Source/ThirdParty/Eigen
+EIGEN_PATH = C:/msys64/mingw64/include/eigen3
+
+
+# Boostライブラリのヘッダがある "親" フォルダへのパス
+BOOST_PATH = C:/msys64/mingw64/include
 # --- ★編集ここまで★ ---
 
 # インクルードパスの指定
-INCLUDES = -I$(EIGEN_PATH)
+INCLUDES = -I$(EIGEN_PATH) -I$(BOOST_PATH)
 
 # 実行可能ファイルの名前
 TARGET = svp_solver
