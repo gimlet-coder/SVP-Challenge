@@ -28,7 +28,7 @@ C++を用いて、教科書『[格子暗号解読 ―SVPチャレンジ・LWEチ
 
 * **言語:** C++ (C++17)
 * **コンパイラ:** g++
-* **ライブラリ:** (Eigen/Dense)
+* **ライブラリ:** **Eigen** (行列演算), **Boost** (ユーティリティ), **GMP/MPFR** (多倍長浮動小数点数演算)
 
 ---
 
@@ -40,55 +40,71 @@ C++を用いて、教科書『[格子暗号解読 ―SVPチャレンジ・LWEチ
 * `LLL.cpp`: LLL基底簡約アルゴリズム 
 * `DeepLLL.cpp`: DeepLLL基底簡約アルゴリズム
 
+**Upgrade** 多倍長浮動小数対応
+    → 高次元･高精度の格子基底簡約を正確に実行可能
 
 ---
 ## 5. 実行方法
 
-本プロジェクトのコンパイルには `Eigen` ライブラリが必要です。
+本プロジェクトのコンパイルには以下ライブラリが必要です。
 
-1.  **ライブラリパスの設定 (必須)**
-    プロジェクトルート（`SVP-Challenge` フォルダ直下）にある `Makefile` をテキストエディタで開いてください。
+1.  **依存ライブラリのインストール**
     
-    `EIGEN_PATH =` で始まる行を見つけ、`=` の右側を、あなたのPC環境（`Eigen` をインストールした場所）に合わせて**必ず書き換えてください。**
-    
-    (設定例: `EIGEN_PATH = E:/UE_5.1/Engine/Source/ThirdParty/Eigen`)
+    格子計算の精度向上のため、Eigen、Boost、GMP および MPFR が必須です。
 
-2.  **リポジトリのクローン**
+    WindowsのMinGW環境でビルドする場合、MSYS2 MinGW x64 シェルで以下のコマンドを実行してインストールしてください。
+    
+    ```bash
+    # Eigen (行列演算), Boost (ユーティリティ) をインストール
+    pacman -S mingw-w64-x86_64-eigen3 mingw-w64-x86_64-boost
+    # GMP (任意精度整数) と MPFR (任意精度浮動小数点数) をインストール
+    pacman -S mingw-w64-x86_64-gmp mingw-w64-x86_64-mpfr
+    ```
+
+2.  **ライブラリパスの設定(必須)**
+    プロジェクトルート（SVP-Challenge フォルダ直下）にある Makefile をテキストエディタで開いてください。
+
+    EIGEN_PATH = および BOOST_PATH = で始まる行を見つけ、= の右側を、あなたのPC環境に合わせて必ず書き換えてください。
+
+    (設定例: EIGEN_PATH = C:/msys64/mingw64/include/eigen3, BOOST_PATH = C:/msys64/mingw64/include)
+
+3.  **リポジトリのクローン**
+    
     ```bash
     git clone [https://github.com/gimlet-coder/SVP-Challenge.git](https://github.com/gimlet-coder/SVP-Challenge.git)
     cd SVP-Challenge
     ```
 
-3.  **コンパイル**
-    ターミナルで以下のコマンドを実行します。`Makefile` がビルドプロセスを自動化します。
-    
-    (WindowsのMinGW環境では `mingw32-make` が正式なコマンド名の場合があります)
+4.  **コンパイル**
+    ターミナルで以下のコマンドを実行します。Makefile がビルドプロセスを自動化します。
+
+    (WindowsのMinGW環境では mingw32-make が正式なコマンド名の場合があります)
     ```bash
     # (PowerShellで 'make' のエイリアス設定が完了している場合)
     make
-    
+
     # 'make' が見つからないと言われた場合
     mingw32-make
     ```
 
-4.  **実行**
-    コンパイルが成功すると、フォルダ内に `svp_solver.exe` が生成されます。
-    以下のコマンドで実行してください。
+5.  **実行**
+    コンパイルが成功すると、フォルダ内に svp_solver.exe が生成されます。 以下のコマンドで実行してください。
     ```bash
     ./svp_solver.exe
     ```
+---
 
-5.  **クリーンアップ (任意)**
-    生成された実行ファイル (`.exe`) やオブジェクトファイル (`.o`) を削除する場合は、以下のコマンドを実行します。
+6. **クリーンアップ(任意)**
+    生成された実行ファイル (.exe) やオブジェクトファイル (.o) を削除する場合は、以下のコマンドを実行します。
     ```bash
     make clean
     # (または mingw32-make clean)
     ```
----
 
-## 6. 更新予定
+## 7. 更新予定
 
 * [ ] MLLL基底簡約アルゴリズムの実装 (←Next)
 * [ ] LLLアルゴリズムの改良
 * [ ] ベクトル計算の効率化
-* [ ] 実際にSVPチャレンジに取り組む
+* [ ] 100次元程度のSVPチャレンジに挑戦
+* [ ] プログラムの並列化実装
