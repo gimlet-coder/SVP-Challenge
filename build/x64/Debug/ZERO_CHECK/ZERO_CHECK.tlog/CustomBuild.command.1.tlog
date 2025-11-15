@@ -1,0 +1,10 @@
+^A:\GITHUB_SVP\SVP-CHALLENGE\BUILD\CMAKEFILES\1311683313B5AB2E4BF7BAC84F3E3D32\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SA:/Github_SVP/SVP-Challenge -BA:/Github_SVP/SVP-Challenge/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file A:/Github_SVP/SVP-Challenge/build/SVP_Challenge_DeepLLL.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

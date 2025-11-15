@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"A:/Github_SVP/SVP-Challenge/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
