@@ -4,6 +4,9 @@
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\LLL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\DeepLLL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -17,6 +20,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\Size-reduce_partial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\MLLL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

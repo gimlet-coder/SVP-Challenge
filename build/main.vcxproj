@@ -414,11 +414,13 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\main.cpp" />
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\LLL.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\DeepLLL.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\Gram_Schmidt.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\GSOUpdate-DeepLLL_partial.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\GSOUpdate-LLL_partial.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\Size-reduce_partial.cpp" />
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\MLLL.cpp" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
