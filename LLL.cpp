@@ -22,7 +22,7 @@ void Gram_Schmidt(const Matrix &B, Matrix &B_star, Matrix &U);
 
 
 // アルゴリズム 5: LLL 基底簡約アルゴリズム
-void LLL(Matrix &B, const double delta){
+void LLL(Matrix &B, const Scalar delta){
     if(delta <= 0.25 || 1 <= delta){
         throw std::out_of_range("Size-reduce 不正なインデックス delta です (1/4 < delta < 1)");
     }
@@ -48,14 +48,14 @@ void LLL(Matrix &B, const double delta){
         Vector b_k_star = B.row(k_idx); 
         for (int j = 0; j < k_idx; j++) {
             // U(k_idx, j) * B_star.row(j) の減算
-            long double mu_ld = U(k_idx, j).convert_to<long double>();
-            b_k_star -= static_cast<Scalar>(mu_ld) * B_star.row(j); 
+            Scalar mu_ld = U(k_idx, j);
+            b_k_star -= mu_ld * B_star.row(j); 
         }
         B_star.row(k_idx) = b_k_star;
         B_norm(k_idx) = b_k_star.squaredNorm();
 
         // Lovász 条件チェック: B_k >= (delta - mu_{k,k-1}^2) * B_{k-1}
-        if(B_norm(k_idx) >= (((typename Matrix::Scalar)delta - U(k_idx, k_idx - 1) * U(k_idx, k_idx - 1)) * B_norm(k_idx - 1))){
+        if(B_norm(k_idx) >= ((delta - U(k_idx, k_idx - 1) * U(k_idx, k_idx - 1)) * B_norm(k_idx - 1))){
             // ステップ 10: Lovász条件を満たす場合
             k_idx++;
         }else{

@@ -21,7 +21,7 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
 
 
 // アルゴリズム 7: DeepLLL 基底簡約アルゴリズム
-void DeepLLL(Matrix &B, const double delta){
+void DeepLLL(Matrix &B, const Scalar delta){
     if(delta <= 0.25 || 1 <= delta){
         throw std::out_of_range("Size_reduce: 不正なパラメータ δ です");
     }
@@ -35,7 +35,6 @@ void DeepLLL(Matrix &B, const double delta){
     Vector B_norm = B_star.rowwise().squaredNorm(); // B_i = ||b*_i||^2
 
     int k_idx = 1;
-    long double delta_ld = static_cast<long double>(delta);
 
     // ステップ 4: while k <= n
     while(k_idx < n){
@@ -48,8 +47,7 @@ void DeepLLL(Matrix &B, const double delta){
         // Size-reduce後の B*_k と B_k の再計算 (B_norm(k_idx) の更新)
         Vector b_k_star = B.row(k_idx); 
         for (int j = 0; j < k_idx; j++) {
-            long double mu_ld = U(k_idx, j).convert_to<long double>();
-            b_k_star -= static_cast<Scalar>(mu_ld) * B_star.row(j);
+            b_k_star -= U(k_idx, j) * B_star.row(j);
         }
         B_star.row(k_idx) = b_k_star;
         B_norm(k_idx) = b_k_star.squaredNorm();
@@ -66,7 +64,7 @@ void DeepLLL(Matrix &B, const double delta){
             }
             
             // Deep Insertion 条件チェック: C < delta * B_i (Step 12)
-            if(C_scalar.convert_to<long double>() >= delta_ld * B_norm(i_idx).convert_to<long double>()){ 
+            if(C_scalar >= delta * B_norm(i_idx)){ 
                 i_idx++; 
             }
             else {
@@ -93,8 +91,8 @@ void DeepLLL(Matrix &B, const double delta){
                     B_star.row(i_update) = B.row(i_update); // b_i で初期化
                     for (int j_update = 0; j_update < i_update; j_update++) {
                         // 更新された U(i, j) と既存の B_star.row(j) を使用
-                        long double mu_ld = U(i_update, j_update).convert_to<long double>();
-                        B_star.row(i_update) -= static_cast<Scalar>(mu_ld) * B_star.row(j_update);
+                        Scalar mu_ld = U(i_update, j_update);
+                        B_star.row(i_update) -= mu_ld * B_star.row(j_update);
                     }
                 }
                 

@@ -36,7 +36,7 @@ void GSOUpdate_LLL_partial(Matrix &U, Vector &B_norm, const int k);
   * @param k [in] 交換させるインデックス 2 <= k <= n に注意  変更無し
   */
 
-void LLL(Matrix &B, const double delta);
+void LLL(Matrix &B, const Scalar delta);
 
 /**
  * @brief LLL基底簡約アルゴリズム
