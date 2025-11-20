@@ -37,7 +37,7 @@ void GSOUpdate_LLL_partial(Matrix &U, Vector &B_norm, const int k);
   * @param k [in] 交換させるインデックス 2 <= k <= n に注意  変更無し
   */
 
-void LLL(Matrix &B, const double delta);
+void LLL(Matrix &B, const Scalar delta);
 
 /**
  * @brief LLL基底簡約アルゴリズム
@@ -46,11 +46,20 @@ void LLL(Matrix &B, const double delta);
  * @param delta [in] LLLにおける簡約パラメータ 変更無し
  */
 
-void DeepLLL(Matrix &B, const double delta);
+void DeepLLL(Matrix &B, const Scalar delta);
 
 /**
  * @brief DeepLLL基底簡約アルゴリズム
  * @param B [in, out] n次元格子 L の基底 B
  *  最後に delta に関する DeepLLL簡約基底 B として返すため変更あり
  * @param delta [in] DeepLLLにおける簡約パラメータ 変更無し
+ */
+
+void MLLL(Matrix &B, const Scalar delta);
+
+/**
+ * @brief MLLL基底簡約アルゴリズム
+ * @param B [in, out] n次元格子 L の基底 B
+ *  最後に delta に関する MLLL 簡約基底 B として返すため変更あり
+ * @param delta [in] MLLLにおける簡約パラメータ 変更無し
  */
