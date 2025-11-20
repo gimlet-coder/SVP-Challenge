@@ -13,11 +13,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # -------------------------------------------------------------
 set(MAIN_SOURCES
     main.cpp
+    LLL.cpp
     DeepLLL.cpp
     Gram_Schmidt.cpp
     GSOUpdate-DeepLLL_partial.cpp
     GSOUpdate-LLL_partial.cpp
     Size-reduce_partial.cpp
+    MLLL.cpp
 )
 add_executable(main ${MAIN_SOURCES})
 # -------------------------------------------------------------
