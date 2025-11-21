@@ -32,77 +32,44 @@ void DeepLLL(Matrix &B, const Scalar delta){
     Matrix B_star, U; 
     Gram_Schmidt(B, B_star, U);
 
-    Vector B_norm = B_star.rowwise().squaredNorm(); // B_i = ||b*_i||^2
+    Vector B_norm = B_star.rowwise().squaredNorm(); // B_i = ||b*_i||^2 step.2
 
     int k_idx = 1;
 
-    // ステップ 4: while k <= n
+    // step.4: while k <= n
     while(k_idx < n){
         
-        // Step 6: Size-reduce(k, j)
         for (int j = k_idx - 1; j >= 0; j--){
-            Size_reduce_partial(B, U, k_idx, j);
+            Size_reduce_partial(B, U, k_idx, j);// Step 6: Size-reduce(k, j)
         }
         
         // Size-reduce後の B*_k と B_k の再計算 (B_norm(k_idx) の更新)
-        Vector b_k_star = B.row(k_idx); 
+        Vector b_k_star = B.row(k_idx);
         for (int j = 0; j < k_idx; j++) {
             b_k_star -= U(k_idx, j) * B_star.row(j);
         }
         B_star.row(k_idx) = b_k_star;
         B_norm(k_idx) = b_k_star.squaredNorm();
         
-        Scalar C_scalar = B_norm(k_idx);
+        Scalar C_scalar = B.row(k_idx).squaredNorm();
         int i_idx = 0;
-        bool FLAG_DEEP_INSERTION = false;
 
-        while (i_idx < k_idx){
-            
-            // C = ||pi_i(b_k)||^2 の効率的な計算 (Step 11)
-            if(i_idx > 0) {
-                 C_scalar -= U(k_idx, i_idx - 1) * U(k_idx, i_idx - 1) * B_norm(i_idx - 1);
-            }
-            
-            // Deep Insertion 条件チェック: C < delta * B_i (Step 12)
-            if(C_scalar >= delta * B_norm(i_idx)){ 
-                i_idx++; 
-            }
-            else {
-                // --- Deep Insertion 実行: B の更新 (Step 15-18) ---
-                Vector temp_B = B.row(k_idx); 
-                for (int j = k_idx; j >= i_idx + 1; j--){
-                    B.row(j) = B.row(j - 1); // B の行をシフト
+        while(i_idx < k_idx){
+            if(C_scalar >= delta * B_norm(i_idx)){
+                C_scalar -= U(k_idx, i_idx) * U(k_idx, i_idx) * B_norm(i_idx);
+                i_idx++;
+            }else{
+                Vector temp = B.row(k_idx);
+                for (int j = k_idx; j > i_idx; j--){
+                    B.row(j) = B.row(j - 1);
                 }
-                B.row(i_idx) = temp_B; // B の i_idx に旧 b_k を挿入
-
-                // ★ GSO Update に備えた B_star の行交換とシフト (重要)
-                // U と B_norm の更新には B_star は不要だが、次のループのために整合性を取る
-                B_star.row(k_idx).swap(B_star.row(i_idx)); 
-                for (int j = k_idx; j >= i_idx + 2; j--){
-                    B_star.row(j).swap(B_star.row(j - 1)); // B_star の行をシフト
-                }
-                
-                // ★ Step 19: GSO情報の更新 (U と B_norm のみ)
-                GSOUpdate_DeepLLL_partial(U, B_norm, i_idx + 1, k_idx + 1); 
-                
-                // ★ B_star の再構築 (部分的な Gram-Schmidt)
-                // 更新された U を使って、影響を受けた i_idx 行目以降の B_star の中身を再計算
-                for (int i_update = i_idx; i_update < n; i_update++) {
-                    B_star.row(i_update) = B.row(i_update); // b_i で初期化
-                    for (int j_update = 0; j_update < i_update; j_update++) {
-                        // 更新された U(i, j) と既存の B_star.row(j) を使用
-                        Scalar mu_ld = U(i_update, j_update);
-                        B_star.row(i_update) -= mu_ld * B_star.row(j_update);
-                    }
-                }
-                
-                // k_idx の調整
-                k_idx = std::max(i_idx + 1, 2) - 1; 
-                FLAG_DEEP_INSERTION = true; 
-                break;
+                B.row(i_idx) = temp;
+                GSOUpdate_DeepLLL_partial(U, B_norm, i_idx + 1, k_idx + 1);
+                Gram_Schmidt(B, B_star, U);
+                B_norm = B_star.rowwise().squaredNorm();
+                k_idx = std::max(i_idx, 1) - 1;
             }
         }
-        
-        if(!FLAG_DEEP_INSERTION) k_idx++;
+        k_idx++;
     }
 }
