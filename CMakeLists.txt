@@ -20,6 +20,7 @@ set(MAIN_SOURCES
     GSOUpdate-LLL_partial.cpp
     Size-reduce_partial.cpp
     MLLL.cpp
+    ENUM.cpp
 )
 add_executable(main ${MAIN_SOURCES})
 # -------------------------------------------------------------
