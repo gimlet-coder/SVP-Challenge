@@ -63,3 +63,17 @@ void MLLL(Matrix &B, const Scalar delta);
  *  最後に delta に関する MLLL 簡約基底 B として返すため変更あり
  * @param delta [in] MLLLにおける簡約パラメータ 変更無し
  */
+
+ bool ENUM(const Matrix &U, const Vector &B_norm, const Scalar &R_square , Vector &v_out, const int k_begin, const int k_end);
+
+ /** 
+  * @brief 格子上の最短ベクトルの数え上げ ENUM 
+  *   返り値 
+  *     true: R_square より短いベクトルが見つかった場合
+  *     false 見つからなかった場合
+  * @param U [in] GSO係数行列 mu_{i, j} が U(i - 1, j - 1) に格納されていることに注意 変更無し
+  * @param B_norm [in] GSOベクトルの2乗ノルム 変更無し
+  * @param R_square [in] 数え上げ上界列 R_n^2 = R_square と考える 変更無し
+  * @param v_out [out] 条件を満たす格子ベクトルの係数ベクトル 
+  * @param k_begin, k_end [in] 探索範囲 変更無し
+  */
