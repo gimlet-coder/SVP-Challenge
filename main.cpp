@@ -32,7 +32,7 @@ int main() {
 
     int min_val = 1'000'000, max_val = 10'000'000; // 乱数範囲
 
-    int n = 20; // 格子次元
+    int n = 40; // 格子次元
     
     std::uniform_int_distribution<int> dist(min_val, max_val); // 上記の乱数範囲に応じたランダムな整数を生成する関数
     
