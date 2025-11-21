@@ -421,6 +421,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\GSOUpdate-LLL_partial.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\Size-reduce_partial.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\MLLL.cpp" />
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\ENUM.cpp" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

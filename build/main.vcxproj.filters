@@ -25,6 +25,9 @@
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\MLLL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\ENUM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="A:\Github_SVP\SVP-Challenge\CMakeLists.txt" />
