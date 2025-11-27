@@ -22,8 +22,8 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
 
     // --- ステップ 1-5: P_j と D_j (||pi_j(b_k)||^2) の計算 (補題 2.4.2) ---
     D(k) = B_norm(k); // D_k = ||pi_k(b_k)||^2 = ||b_k^*||^2 = B_k
-    
-    // j = k-1 から i まで、D_j = D_{j+1} + mu_{k,j}^2 * B_j を計算
+    P(k) = B_norm(k);
+    // j = k - 1 から i まで、D_j = D_{j+1} + mu_{k,j}^2 * B_j を計算
     for (int j = k - 1; j >= i; j--){
         P(j) = U(k, j) * B_norm(j); // P_j = mu_k,j * B_j (アルゴリズム8のP_jとは定義が異なるが、ここでは mu_{k,j} * B_j を表す)
         D(j) = D(j + 1) + U(k, j) * P(j); // D_j = ||pi_j(b_k)||^2
@@ -35,71 +35,54 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
     // --- ステップ 13-14: U(l, j) の更新 (j > i) (補題 2.4.3(1) の後半) ---
     for (int j = k; j >= i + 1; j--){
         // T = mu_{k,j-1} / D_j。 Deep Insertion 前は mu_{k,j-1} は存在しないので 0
-        long double T_ld = 0.0L;
+        Scalar T;
         if(j - 1 >= 0) {
-            T_ld = U(k, j - 1).convert_to<long double>() / D(j).convert_to<long double>();
+            T = U(k, j - 1) / D(j);
         }
         
-        long double P_j_ld = P(j).convert_to<long double>(); // P_j = mu_{k,j} * B_j
         
-        // l > k の更新 (l = n - 1 から k + 1)
+        // l > k の更新 (l = n - 1 から k)
         for (int l = n - 1; l >= k + 1; l--){
-            long double U_lj_ld = U(l, j).convert_to<long double>();
-            long double U_lj_1_ld = U(l, j - 1).convert_to<long double>();
-            
-            // S(l) の更新: S_l <- S_l + mu_{l,j} * P_j
-            long double S_l_ld = S(l).convert_to<long double>(); 
-            S_l_ld += U_lj_ld * P_j_ld; 
-            S(l) = static_cast<Scalar>(S_l_ld);
             
             // U(l, j) の更新: nu_{l,j} <- mu_{l,j-1} - T * S_l
-            long double result_ld = U_lj_1_ld - T_ld * S_l_ld;
-            U(l, j) = static_cast<Scalar>(result_ld); 
+            S(l) += U(l, j) * P(j);
+            U(l, j) = U(l, j - 1) - T * S(l);
         }
         
         // k >= l > j の更新 (l = k から j + 1)
         for (int l = k; l >= j + 1; l--){
-            long double U_l_1j_ld = U(l - 1, j).convert_to<long double>(); // mu_{l-1, j}
-            
-            // S(l) の更新: S_l <- S_l + mu_{l-1,j} * P_j
-            long double S_l_ld = S(l).convert_to<long double>();
-            S_l_ld += U_l_1j_ld * P_j_ld;
-            S(l) = static_cast<Scalar>(S_l_ld);
 
-            // U(l, j) の更新: nu_{l,j} <- mu_{l-1, j-1} - T * S_l
-            long double result_ld = U(l - 1, j - 1).convert_to<long double>() - T_ld * S_l_ld;
-            U(l, j) = static_cast<Scalar>(result_ld);
+            Scalar mu_val;
+
+            if(l - 1 == j){
+                mu_val = 1;
+            }else{
+                mu_val = U(l - 1, j);
+            }
+
+            S(l) += mu_val * P(j);
+            U(l, j) = U(l - 1, j - 1) - T * S(l);
         }
     }
     
     // --- ステップ 16-23: mu_l,i の更新 (補題 2.4.3(2)) ---
-    long double T_div_D_i_ld = 1.0L / D(i).convert_to<long double>(); // 1/D_i
-    long double P_i_ld = P(i).convert_to<long double>(); // P_i = mu_{k,i} * B_i
+    
+    Scalar T = 1.0 / D(i);
 
     // l > k の更新 (l = n - 1 から k + 1)
     for (int l = n - 1; l >= k + 1; l--){
-        long double S_l_ld = S(l).convert_to<long double>();
-        long double U_li_ld = U(l, i).convert_to<long double>();
-        
-        // nu_{l,i} <- 1/D_i * (S_l + mu_{l,i} * P_i)
-        long double result_ld = T_div_D_i_ld * (S_l_ld + U_li_ld * P_i_ld);
-        U(l, i) = static_cast<Scalar>(result_ld);
+        U(l, i) = T * (S(l) + U(l, i) * P(i));
     }
     
-    // k >= l > i の更新 (l = k から i+1)
-    for (int l = k; l >= i + 1; l--){
-        long double S_l_ld = S(l).convert_to<long double>();
-        long double U_l_1i_ld = U(l - 1, i).convert_to<long double>();
-        
-        // nu_{l,i} <- 1/D_i * (S_l + mu_{l-1, i} * P_i) [cite: 2090]
-        long double result_ld = T_div_D_i_ld * (S_l_ld + U_l_1i_ld * P_i_ld);
-        U(l, i) = static_cast<Scalar>(result_ld);
+    // k >= l > i の更新 (l = k - 1 から i + 2)
+    for (int l = k; l >= i + 2; l--){
+        U(l, i) = T * (S(l) + U(l - 1, i) * P(i));
     }
 
-    // mu_{i+1, i} の特別な更新は、上記のループで l = i + 1 のときに処理される (mu_{i, i} = 1 を利用)
-    
+    U(i + 1, i) = T * P(i);
+
     // --- ステップ 24-30: mu_l,j のシフト (j < i) (補題 2.4.3(3), (4)) ---
-    for (int j = 0; j <= i - 1; j++){
+    for (int j = 0; j < i; j++){
         Scalar temp = U(k, j);
         for (int l = k; l >= i + 1; l--){
             U(l, j) = U(l - 1, j);
@@ -110,7 +93,7 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
     // --- ステップ 31-34: B_norm の更新 (補題 2.4.2) ---
     for (int j = k; j >= i + 1; j--){
         // B_j <- D_j * B_{j-1} / D_{j-1}
-        B_norm(j) = static_cast<Scalar>(D(j).convert_to<long double>() * B_norm(j - 1).convert_to<long double>() / D(j - 1).convert_to<long double>());
+        B_norm(j) = D(j) * B_norm(j - 1) / D(j - 1);
     }
     B_norm(i) = D(i); // B_i <- D_i = ||pi_i(b_k)||^2
 }
