@@ -116,7 +116,8 @@
         "typeindex": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "*.inc": "cpp"
     },
     "cmake.configureArgs": [
         "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
