@@ -25,17 +25,3 @@ void Size_reduce_partial(Matrix &B, Matrix &U, const int i,const int j);
  * @param i, j [in] 更新対象の行インデックス (0-based) i > j である必要あり 変更無し
  */
 
-
-
-
-void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const int k_in);
-
-/**
- * @brief k_in 番目のベクトルを i_in 番目のベクトルの直前に挿入する操作を行った後のGSO情報を更新する
- * @param U [in out] GSO係数行列 mu_{l, j} が U(l - 1, j - 1) に格納されていることに注意
- *  σ_{i, k} によって入れ替えた新しい基底のGSO係数行列を U に反映させるので変更される可能性あり
- * @param B_norm [in out] GSOベクトルの2乗ノルム B_j = ||b_j*||^2 が B_norm(j - 1) に格納されていることに注意
- *  更新されたGSOベクトルの2乗ノルムを B_norm に反映させることから関数内で変更される可能性あり
- * @param i_in, k_in [in] 挿入位置 i_in 及び 挿入されるベクトルを示す k_in 
- *  1 <= i_in < k_in <= n を満たす必要があることに注意 変更無し
- */
