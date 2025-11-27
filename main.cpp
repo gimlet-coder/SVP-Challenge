@@ -35,15 +35,16 @@ int main() {
     int n = 40; // 格子次元
     
     std::uniform_int_distribution<int> dist(min_val, max_val); // 上記の乱数範囲に応じたランダムな整数を生成する関数
-    
+   
     Eigen::MatrixXi B_int(n, n);
-
     B_int.setZero();
     for (int i = 0; i < n; i++){
         B_int(i, i) = 1; // 対角成分を 1 に設定
         B_int(i, 0) = dist(gen); // 1列目に大きな乱数を設定
     }
-    
+   
+   
+
     std::cout << "入力した基底行列 B:\n" << B_int << std::endl << std::endl;
 
     Scalar Norm_input = B_int.row(0).cast<Scalar>().squaredNorm();
@@ -93,27 +94,27 @@ int main() {
 
     int min_val = 1'000'000, max_val = 10'000'000; // 乱数範囲
 
-    int n = 40; // 格子次元
+    // int n = 40; // 格子次元
     
     std::uniform_int_distribution<int> dist(min_val, max_val); // 上記の乱数範囲に応じたランダムな整数を生成する関数
     
-    Eigen::MatrixXi B_int(n, n);
+    Eigen::MatrixXi B_int(5, 4);
 
-    B_int.setZero();
-    for (int i = 0; i < n; i++){
-        B_int(i, i) = 1; // 対角成分を 1 に設定
-        B_int(i, 0) = dist(gen); // 1列目に大きな乱数を設定
-    }
+    B_int << 388, 417, 417, -86,
+            -672, -73, -121, 944,
+            -689, 379, 724, 653,
+            -179, 96, -24, 978,
+            508, -705, 173, -343;
     
     std::cout << "入力した基底行列 B:\n" << B_int << std::endl << std::endl;
 
     Scalar Norm_input = B_int.row(0).cast<Scalar>().squaredNorm();
 
-    double delta = 0.99;
+    double delta = 0.75;
 
 
 
-    Matrix B_long_double(n, n); 
+    Matrix B_long_double(5, 4); 
     B_long_double = B_int.cast<typename Matrix::Scalar>(); // Matrix::Scalarはboost::multiprecision型
 
     try{
