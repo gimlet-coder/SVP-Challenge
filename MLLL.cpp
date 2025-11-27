@@ -27,7 +27,7 @@ void MLLL(Matrix &B, const Scalar delta){
     Vector B_sq_norm(h); // 疑似コードでいうところの B (B_i = ||b^*_i||^2) にあたるもの
     
     while(g <= z){
-        if(B_sq_norm(g) < 1e-20){ // ノルムの2乗が十分小さければ0ベクトルであると判定する(浮動小数点の誤差対策)
+        if(B.row(g).squaredNorm() < 1e-20){ // ノルムの2乗が十分小さければ0ベクトルであると判定する(浮動小数点の誤差対策)
             // Step4-9: B_g=0 なら末尾と交換し z-- (0ベクトル除去)
             if(g < z){
                 B.row(g).swap(B.row(z));
@@ -90,10 +90,10 @@ void MLLL(Matrix &B, const Scalar delta){
                                 Scalar t = B_sq_norm(k - 1) / B_proj;
                                 U(k, k - 1) = nu * t;
                                 Vector w = B_star.row(k - 1);
-                                B_star.row(k - 1) = B_star.row(k) + nu * w;
+                                B_star.row(k - 1) = B_star.row(k) + nu * w.transpose();
                                 B_sq_norm(k - 1) = B_proj;
                                 if(k <= l){
-                                    B_star.row(k) = -U(k, k - 1) * B_star.row(k) + (B_sq_norm(k) / B_proj) * w;
+                                    B_star.row(k) = -U(k, k - 1) * B_star.row(k) + (B_sq_norm(k) / B_proj) * w.transpose();
                                     B_sq_norm(k) *= t;
                                 }// ここまで step.28
                                 for (int i = k; i <= l; i++){
