@@ -26,8 +26,9 @@ void Size_reduce_partial(Matrix &B, Matrix &U, const int i, const int j){
 
     // --- ここまで引数が条件を満たしているかの確認 ---
 
-    if(abs(U(i, j)) > 0.5){
-        Scalar q = round(U(i, j));
+    Scalar mu = U(i, j);
+    if(abs(mu) >= Scalar(0.5)){
+        Scalar q = round(mu);
         B.row(i) -= q * B.row(j);
         for (int l = 0; l <= j; l++){
             U(i, l) -= q * U(j, l); // GSO係数の更新
