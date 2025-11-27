@@ -37,3 +37,12 @@ namespace Eigen {
 using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>; // 列ベクトル
 using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
 
+
+// --- 4. Scalar 型における演算の下準備 ---
+
+using boost::multiprecision::abs;
+using boost::multiprecision::round;
+using boost::multiprecision::floor;
+using boost::multiprecision::ceil;
+using boost::multiprecision::sqrt;
+using boost::multiprecision::pow;
