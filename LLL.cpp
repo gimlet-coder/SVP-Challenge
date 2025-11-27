@@ -43,17 +43,6 @@ void LLL(Matrix &B, const Scalar delta){
             Size_reduce_partial(B, U, k_idx, j);
         }
         
-        // GSOベクトルの再計算と B_norm の更新
-        // b*_k の再計算: b*_k = b_k - sum_{j=1}^{k-1} mu_{k,j} * b*_j
-        Vector b_k_star = B.row(k_idx); 
-        for (int j = 0; j < k_idx; j++) {
-            // U(k_idx, j) * B_star.row(j) の減算
-            Scalar mu_ld = U(k_idx, j);
-            b_k_star -= mu_ld * B_star.row(j); 
-        }
-        B_star.row(k_idx) = b_k_star;
-        B_norm(k_idx) = b_k_star.squaredNorm();
-
         // Lovász 条件チェック: B_k >= (delta - mu_{k,k-1}^2) * B_{k-1}
         if(B_norm(k_idx) >= ((delta - U(k_idx, k_idx - 1) * U(k_idx, k_idx - 1)) * B_norm(k_idx - 1))){
             // ステップ 10: Lovász条件を満たす場合
@@ -61,7 +50,7 @@ void LLL(Matrix &B, const Scalar delta){
         }else{
             B.row(k_idx - 1).swap(B.row(k_idx)); // 基底ベクトルの交換: b_{k-1} <-> b_k
             //// ステップ 12: GSO情報の更新 (k は 1-based)
-            GSOUpdate_LLL_partial(U, B_norm, k_idx + 1);
+            GSOUpdate_LLL_partial(U, B_norm, k_idx);
             k_idx = std::max(k_idx - 1, 1);
         }
     }
