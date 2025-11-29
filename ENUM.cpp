@@ -80,7 +80,7 @@ std::cerr << "見つかったノルム: " << R_square << " (Nodes: " << node_cou
                     continue;
                 }
                 // 0 ベクトルなら次の候補へ step.33 ~ 38 と同じ処理を行う
-                if (v_temp(k - 1) >= c(k - 1)){
+                if (v_temp(k - 1) > c(k - 1)){
                     v_temp(k - 1) += w_int(k - 1);
                 }else{
                     v_temp(k - 1) -= w_int(k - 1);
