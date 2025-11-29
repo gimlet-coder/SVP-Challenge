@@ -20,6 +20,83 @@
 #include "main.hpp"
 
 
+#if 1
+
+int main() {
+    SetConsoleOutputCP(65001);
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(NULL);
+
+    // --- 例 3.2.1 の基底行列 B ---
+    int n = 10;
+    Matrix B(n, n);
+    B <<  -79, 35,  31,  83,  -66, 35, -32, 46, 21, 2,
+          43, -64, -37, -31, -27, -7, -42, 21, 16, 16,
+          -1, -97, -91, -43, 19, -21, -65, -36, 34, -55,
+          -58, -38, 87, 42, 94, -83, 66, -69, -2, -30,
+          84, -61, 93, -67, 3, 94, 31, 27, -60, 98,
+          -1, 34, 58, -38, 29, 67, -18, 15, -75, -16,
+          19, 16, 52, 32, -20, 55, 94, -34, 4, 80,
+          -58, -17, 99, 93, -49, -53, 24, 51, 5, 93,
+          17, 31, 78, 53, 40, -22, -39, 7, 70, -98,
+          93, -6, -7, -12, 79, -40, 27, -95, 98, 20;
+
+    std::cout << "入力した基底行列B:\n" << B << std::endl << std::endl;
+/*
+    Scalar delta = 0.26;
+    std::cout <<"delta = " << delta << " におけるDeepLLLの実行中" << std::endl;
+    DeepLLL(B, delta);
+    std::cout << "DeepLLLの実行結果:\n" << B << "\n\n";
+*/
+    // --- GSOの計算 ---
+    Matrix B_star(n, n);
+    Matrix U(n, n);
+    Gram_Schmidt(B, B_star, U);
+
+    // ENUM用にノルム配列を作成
+    Vector B_norm(n);
+    for(int i = 0; i < n; i++){
+        B_norm(i) = B_star.row(i).squaredNorm();
+    }
+    std::cout << "GSOの2乗ノルム (B*):\n" << B_norm.transpose() << std::endl << std::endl;
+
+    // --- 探索設定 ---
+    // 第1基底ベクトル b1 のノルム
+    Scalar b1_sq_norm = B.row(0).squaredNorm();
+    std::cout << "||b1||^2 = " << b1_sq_norm << "\n";
+
+    // b1 より短いベクトルを探す (R^2 = ||b1||^2 - 1)
+    Scalar R_square = b1_sq_norm - 1; 
+    
+    std::cout << "||v||^2 <= " << R_square << " となるような v を探索中 ...\n";
+
+    Vector v_coeffs(n);
+    long long node_count = 0;
+    bool found = ENUM(U, B_norm, R_square, v_coeffs, 0, n - 1, node_count);
+
+    if (found) {
+        std::cout << "\n!!! 最短ベクトルを発見 !!!\n";
+        std::cout << "係数 (v1...v10): " << v_coeffs.transpose() << "\n";
+
+        // 実際の格子ベクトルを計算
+        Vector v_lattice = Vector::Zero(n);
+        for(int i = 0; i < n; i++){
+            // v_coeffs(i) * B.row(i)
+            v_lattice += v_coeffs(i) * B.row(i);
+        }
+        std::cout << "格子ベクトル: " << v_lattice.transpose() << "\n";
+        std::cout << "2乗ノルム: " << v_lattice.squaredNorm() << "\n";
+
+        // 教科書の正解チェック (0, 1, 1, 0, 1) or (0, -1, -1, 0, -1)
+    } else {
+        std::cout << "\n最短ベクトルは見つかりませんでした。b1 が最短だと推測されます。\n b1 = " << B.row(0) <<std::endl;
+    }
+
+    return 0;
+}
+#endif
+
+
 #if 0
 // DeepLLLの動作確認用
 int main() {
@@ -89,7 +166,7 @@ int main() {
 
 #endif
 
-#if 1
+#if 0
 // MLLLの動作確認用
 int main() {
     SetConsoleOutputCP(65001); // このコードの出力文字コードを UTF-8 に強制
