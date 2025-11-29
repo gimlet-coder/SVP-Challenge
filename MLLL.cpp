@@ -25,9 +25,10 @@ void MLLL(Matrix &B, const Scalar delta){
     Matrix B_star(h, n), U(h, h); // GSOを求める際の受け皿
     U.setZero();
     Vector B_sq_norm(h); // 疑似コードでいうところの B (B_i = ||b^*_i||^2) にあたるもの
-    
+    bool FLAG_startagain = false;
     while(g <= z){
-        if(B.row(g).squaredNorm() < 1e-20){ // ノルムの2乗が十分小さければ0ベクトルであると判定する(浮動小数点の誤差対策)
+        if(B.row(g).squaredNorm() < Scalar("1e-20")){ // ノルムの2乗が十分小さければ0ベクトルであると判定する(浮動小数点の誤差対策)
+// std::cerr << "  -> Found Zero Vector at " << g << "! Moving to end." << std::endl; // デバッグ用
             // Step4-9: B_g=0 なら末尾と交換し z-- (0ベクトル除去)
             if(g < z){
                 B.row(g).swap(B.row(z));
@@ -37,7 +38,7 @@ void MLLL(Matrix &B, const Scalar delta){
         } //step.5
         B_star.row(g) = B.row(g);
         for (int j = 0; j < g; j++){
-            if(B_sq_norm(j) > 1e-20){// ゼロ除算対策
+            if(B_sq_norm(j) > Scalar("1e-20")){// ゼロ除算対策
                 U(g, j) = B.row(g).dot(B_star.row(j)) / B_sq_norm(j);
             }else{
                 U(g, j) = 0;
@@ -45,26 +46,56 @@ void MLLL(Matrix &B, const Scalar delta){
             B_star.row(g) -= U(g, j) * B_star.row(j);
         }
         B_sq_norm(g) = B_star.row(g).squaredNorm();
+
+// std::cerr << "Step g=" << g << "  (Current Norm: " << B_sq_norm(g) << ")" << std::endl; // デバッグ用                
         U(g, g) = 1.0;
+
+        //線形従属のcheck
+        if(B_sq_norm(g) < Scalar("1e-20")){
+
+
+            for(int j = g - 1; j >= 0; j--){
+                 Size_reduce_partial(B, U, g, j);
+            }
+            // 0ベクトルがあったら末尾に追いやって無視
+            if(g < z){
+                B.row(g).swap(B.row(z));
+            }
+            z--; //有効次元を減らす
+            continue;
+        }
         if(g == 0){
             g = 1;
+            continue;
         }else{
             //step.11
             int l = g, k = g; // l, k は 0-based index
-            bool FLAG_startagain = false;
+            FLAG_startagain = false;
             while(k <= l && !FLAG_startagain){
                 Size_reduce_partial(B, U, k, k - 1); //step.14
                 Scalar nu = U(k, k - 1);
                 Scalar B_proj = B_sq_norm(k) + nu * nu * B_sq_norm(k - 1);
+
+/* Scalar threshold = delta * B_sq_norm(k - 1) - Scalar("1e-20"); // 比較用の値を計算
+
+// デバッグ出力を追加 (数値の挙動を確認)
+std::cerr << " Check k=" << k 
+<< " nu=" << nu 
+<< " B_proj=" << B_proj 
+<< " Threshold=" << threshold;
+*/
                 if(B_proj >= delta * B_sq_norm(k - 1) - 1e-20){ // step.15 Lovasz 条件
                     for(int j = k - 2; j >= 0; j--){
+// std::cerr << " -> OK (No Swap)" << std::endl; // 交換なし
                         Size_reduce_partial(B, U, k, j);
                     }
                     k++;
                 }else{ //step.16
+// std::cerr << " -> FAIL (Swap needed!)" << std::endl; // 交換発生
                     /* step.17 */
-                    if(B.row(k).squaredNorm() < 1e-20){ //上記同様浮動小数の誤差対策で判定基準を設ける
+                    if(B.row(k).squaredNorm() < Scalar("1e-20")){ //上記同様浮動小数の誤差対策で判定基準を設ける
                         if(k < z){
+// std::cerr << "  -> SWAP executed at k=" << k << "! Backtracking to g=" << std::max(k-1, 0) << std::endl; // デバッグ用                            
                             B.row(k).swap(B.row(k - 1));
                         }
                     z--;
@@ -74,7 +105,7 @@ void MLLL(Matrix &B, const Scalar delta){
                         // step. 21
                         B.row(k).swap(B.row(k - 1));
                         //step. 22
-                        for (int j = 0; j <= k - 2; j++) {
+/*                        for (int j = 0; j <= k - 2; j++) {
                             U(k, j).swap(U(k - 1, j));
                         }
                         if(B_proj > 1e-20){
@@ -111,7 +142,10 @@ void MLLL(Matrix &B, const Scalar delta){
                         }
                         // k を戻す
                         k = std::max(k - 1, 1);
-                    }
+*/
+                        g = std::max(k - 1, 0);
+                        FLAG_startagain = true;
+                        }
                 }
             }
             if(!FLAG_startagain){
