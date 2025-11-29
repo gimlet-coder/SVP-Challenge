@@ -1,14 +1,15 @@
-﻿#include <algorithm>
+﻿#include <iostream>
+#include <algorithm>
 #include <stdexcept>
 #include <vector>
 #include <Eigen/Dense>
 #include <cmath>
 #include <limits>
-#include <iostream>
+
 
 #include "lattice_types.hpp"
 
-bool ENUM(const Matrix &U, const Vector &B_norm, const Scalar &R_square, Vector &v_out, const int k_begin, const int k_end){
+bool ENUM(const Matrix &U, const Vector &B_norm, Scalar &R_square, Vector &v_out, const int k_begin, const int k_end, long long &node_count){
     const int n_rows = static_cast<int>(U.rows());
     const int n_cols = static_cast<int>(U.cols());
 
@@ -33,6 +34,8 @@ bool ENUM(const Matrix &U, const Vector &B_norm, const Scalar &R_square, Vector 
     for (int i = 1; i <= n; i++){
         r[i] = i;
     }
+    bool FLAG_found = false;
+    node_count = 0;
 
     // v_temp, c, w_int の初期化
     Eigen::Matrix<long long, Eigen::Dynamic, 1> v_temp(n);
@@ -46,10 +49,12 @@ bool ENUM(const Matrix &U, const Vector &B_norm, const Scalar &R_square, Vector 
     int k = n;            // step.8: 根 (k を増やして葉へ)
 
     while(true){ // step.9
+        node_count++;
         const int global_k = k + k_begin - 1;
         Scalar diff = static_cast<Scalar>(v_temp(k - 1)) - c(k - 1);
 
         rho(k) = rho(k + 1) + diff * diff * B_norm(global_k); // step.10
+
 
         if(rho(k) <= R_square){ // step.11
             if (k == 1) { // 葉 k = 1
@@ -63,7 +68,16 @@ bool ENUM(const Matrix &U, const Vector &B_norm, const Scalar &R_square, Vector 
                 }
                 if (!all_zero) { // 非零ベクトル発見
                     v_out = v_temp.cast<Scalar>();
-                    return true;
+                    R_square = rho(k);
+                    FLAG_found = true;
+std::cerr << "見つかったノルム: " << R_square << " (Nodes: " << node_count << ")" << std::endl;
+                    if (v_temp(k - 1) >= c(k - 1)){
+                        v_temp(k - 1) += w_int(k - 1);
+                    }else{
+                        v_temp(k - 1) -= w_int(k - 1);
+                    }
+                    w_int(k - 1)++;
+                    continue;
                 }
                 // 0 ベクトルなら次の候補へ step.33 ~ 38 と同じ処理を行う
                 if (v_temp(k - 1) >= c(k - 1)){
@@ -74,7 +88,6 @@ bool ENUM(const Matrix &U, const Vector &B_norm, const Scalar &R_square, Vector 
                 w_int(k - 1)++;
                 continue;
             }
-
             k--; // step.15:
             r[k] = std::max(r[k], r[k + 1]); // step.16
 
@@ -92,7 +105,7 @@ bool ENUM(const Matrix &U, const Vector &B_norm, const Scalar &R_square, Vector 
         } else { // rho(k) > R_square
             k++; // step.24
             if (k == n + 1) { // step.25
-                return false; // step.26: 目的の v \in L が存在しない場合の終了
+                return FLAG_found; // step.26: 目的の v \in L が存在しない場合の終了
             }
 
             r[k - 1] = k; // step.28
