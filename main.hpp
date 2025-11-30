@@ -76,4 +76,5 @@ void MLLL(Matrix &B, const Scalar delta);
   * @param R_square [in] 数え上げ上界列 R_n^2 = R_square と考える 関数内で更新していくので変更あり
   * @param v_out [out] 条件を満たす格子ベクトルの係数ベクトル 
   * @param k_begin, k_end [in] 探索範囲 変更無し
+  * @param node_count [out] 最短ベクトルを探すのにかかったノード数を保存する
   */
