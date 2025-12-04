@@ -10,6 +10,7 @@
 #include "lattice_types.hpp" 
 
 // 上記のヘッダーによって Vector と Matrix は Scalar 型になっている
+// MULTI_PRECISION_EPSILON は上記ヘッダーにより定義されている この値を用いて非ゼロ判定をする
 
 #include "MLLL.hpp"
 
@@ -30,7 +31,7 @@ void MLLL(Matrix &B, const Scalar delta){
         //step.5
         B_star.row(g) = B.row(g);
         for (int j = 0; j < g; j++){
-            if(B_sq_norm(j) > Scalar("1e-20")){// ゼロ除算対策
+            if(B_sq_norm(j) > MULTI_PRECISION_EPSILON){// ゼロ除算対策
                 U(g, j) = B.row(g).dot(B_star.row(j)) / B_sq_norm(j);
             }else{
                 U(g, j) = 0;
@@ -54,14 +55,14 @@ void MLLL(Matrix &B, const Scalar delta){
                 Scalar B_proj = B_sq_norm(k) + nu * nu * B_sq_norm(k - 1);
 
 
-                if(B_proj >= delta * B_sq_norm(k - 1) - 1e-20){ // step.15 Lovasz 条件
+                if(B_proj >= delta * B_sq_norm(k - 1) - MULTI_PRECISION_EPSILON){ // step.15 Lovasz 条件
                     for(int j = k - 2; j >= 0; j--){
                         Size_reduce_partial(B, U, k, j);
                     }
                     k++;
                 }else{ //step.16
                     /* step.17 */
-                    if(B.row(k).squaredNorm() < Scalar("1e-20")){ //上記同様浮動小数の誤差対策で判定基準を設ける
+                    if(B.row(k).squaredNorm() < MULTI_PRECISION_EPSILON){ //上記同様浮動小数の誤差対策で判定基準を設ける
                         if(k < z){                            
                             B.row(k).swap(B.row(z));
                         }
@@ -75,8 +76,8 @@ void MLLL(Matrix &B, const Scalar delta){
                         for (int j = 0; j <= k - 2; j++) {
                             U(k, j).swap(U(k - 1, j));
                         }
-                        if(B_proj > Scalar("1e-20")){
-                            if(B_sq_norm(k) < Scalar("1e-20")){
+                        if(B_proj > MULTI_PRECISION_EPSILON){
+                            if(B_sq_norm(k) < MULTI_PRECISION_EPSILON){
                                 B_sq_norm(k - 1) = B_proj;
                                 B_star.row(k - 1) *= nu;
                                 U(k, k - 1) = 1.0 / nu;
