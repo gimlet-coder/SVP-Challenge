@@ -13,10 +13,11 @@
 #include "lattice_types.hpp"
 #include "Progressive_BKZ.hpp"
 
-// ----------------------------------------------------------------------------
-// 基底のランダム化 (Unimodular変換) //あえて行列をほどよく汚して再度簡約させてみる
-// ----------------------------------------------------------------------------
-static void randomize_basis(Matrix& B, int num_operations) {
+/* ----------------------------------------------------------------------------
+ 基底のランダム化 (Unimodular変換) //あえて行列をほどよく汚して再度簡約させてみる
+/ ----------------------------------------------------------------------------
+*/
+static void randomize_basis(Matrix &B, int num_operations) {
     int n = B.rows();
     std::random_device rd;
     std::mt19937 gen(rd()); // 適当な乱数を生成
@@ -37,12 +38,57 @@ static void randomize_basis(Matrix& B, int num_operations) {
         }
     }
 }
+/*----------------------------------------------------------------------------
+ファイルを出力する関数
+/ ----------------------------------------------------------------------------
+*/
 
-// ----------------------------------------------------------------------------
-// データの読み込み
-// ----------------------------------------------------------------------------
 
-static void load_and_clean_data(const std::string& filename, int n, Matrix& B){
+static void save_current_state(const Matrix &B, int n, int beta, const Scalar best_norm_sq, const std::string &prefix) {
+    // ファイル名: [prefix]_beta_[beta].txt の形式
+    // Global Best Record の場合は beta の代わりに "best" を使う
+    std::string beta_str = (beta == -1) ? "best" : std::to_string(beta);
+    std::string filename = prefix + "_beta_" + beta_str + ".txt";
+    std::ofstream outfile(filename);
+
+    if (!outfile.is_open()) {
+        std::cerr << "警告: 状態ファイル " << filename << " を開けませんでした。" << std::endl;
+        return;
+    }
+
+    // ノルムは二乗ノルムとして格納 (多倍長 Scalar 型)
+    Scalar b1_norm_sq = B.row(0).squaredNorm();
+    double current_norm = std::sqrt(static_cast<double>(b1_norm_sq));
+
+    outfile << "--- Progressive BKZ State Save ---" << std::endl;
+    outfile << "Dimension: " << n << std::endl;
+    outfile << "Last Completed Beta: " << beta_str << std::endl;
+    outfile << "Shortest Norm Squared (||b1||^2): " << std::setprecision(30) << b1_norm_sq << std::endl;
+    outfile << "Shortest Vector Norm (||b1||): " << std::fixed << std::setprecision(4) << current_norm << std::endl;
+    outfile << "Best Norm Found in This Run: " << std::fixed << std::setprecision(4) << std::sqrt(static_cast<double>(best_norm_sq)) << std::endl;
+    outfile << "--- Basis Matrix B (n x n) ---" << std::endl;
+    
+    // 基底行列 B の出力
+    for (int i = 0; i < n; ++i) {
+        // 各行ベクトルを [] で囲んで出力（読み込み関数が処理しやすいように）
+        outfile << "[";
+        for (int j = 0; j < n; ++j) {
+            // 多倍長精度を活かして正確な値をスペース区切りで出力
+            outfile << B(i, j) << (j < n - 1 ? " " : "");
+        }
+        outfile << "]" << std::endl;
+    }
+    
+    outfile.close();
+    std::cout << "\n[SAVE] 状態を " << filename << " に保存しました。ノルム: " 
+              << std::fixed << std::setprecision(4) << current_norm << std::endl;
+}
+
+/*----------------------------------------------------------------------------
+ データの読み込み
+/ ----------------------------------------------------------------------------
+*/
+static void load_and_clean_data(const std::string &filename, int n, Matrix &B){
     if (n <= 0) {
         throw std::invalid_argument("次元 n は 1 以上である必要があります。");
     }
@@ -101,7 +147,13 @@ static void load_and_clean_data(const std::string& filename, int n, Matrix& B){
 @brief 最短ベクトルが求まったとしても, 基底をある程度汚くして max_retries 回実行して最短であるかを確認する
  ----------------------------------------------------------------------------
 */
-void Progressive_BKZ(const std::string& filename, int n, int start_beta, int max_beta, Scalar delta, double target_norm, int max_retries) {
+
+// グローバル保持することによって途中で終了しても再開できるようにする
+static Scalar Global_best_norm_sq = std::numeric_limits<Scalar>::max(); // 最大値で初期化
+static Matrix Global_B_best;
+
+
+void Progressive_BKZ(const std::string &filename, int n, int start_beta, int max_beta, Scalar delta, double target_norm, int max_retries) {
     Matrix B(n, n);
     
     // 1. データ読み込み
@@ -120,6 +172,8 @@ void Progressive_BKZ(const std::string& filename, int n, int start_beta, int max
     std::cout << "\n=== Start Progressive BKZ (Beta: " << start_beta << " -> " << max_beta << ") ===" << std::endl;
 
     for (int beta = start_beta; beta <= max_beta; ) { // POINT!! ベータはループの最下層で増加させる
+
+
         std::cout << "\n----------------------------------------" << std::endl;
         std::cout << "[Phase Beta = " << beta << "]" << std::endl;
         
@@ -152,7 +206,12 @@ void Progressive_BKZ(const std::string& filename, int n, int start_beta, int max
 
             // 改善判定
             if (current_sq < best_norm_sq - 1e-5) { // ここの精度はざっくりでいいので10^{-5} 程度にした
-                std::cout << " -> Improved!" << std::endl;
+
+                best_norm_sq = current_sq;
+                Global_B_best = B;
+                save_current_state(Global_B_best, n, -1, Global_best_norm_sq, "lattice_state_50d");
+            std::cout << "\n!!! NEW GLOBAL RECORD FOUND: " << std::sqrt(static_cast<double>(Global_best_norm_sq)) << " !!!\n";
+            
                 best_norm_sq = current_sq;
                 retry_count = 0; // 改善したらカウントリセット
                 improved_in_phase = true;
@@ -168,7 +227,7 @@ void Progressive_BKZ(const std::string& filename, int n, int start_beta, int max
                 }
             }
         }
-        
+
         if (beta < max_beta) {
         int next_beta = beta + 1; // 少なくとも + 1
 
@@ -186,10 +245,12 @@ void Progressive_BKZ(const std::string& filename, int n, int start_beta, int max
         }
         // ここでは for の制御部で beta++ しないため、beta = next_beta で次の周の beta が決定する
         
-    } else {
-        // beta == max_beta の実行が終わったら、ループを終了させる
-        break;
-    }
+        } else {
+            // beta == max_beta の実行が終わったら、ループを終了させる
+            break;
+        }
+
+        B = Global_B_best;
 
     }
 
