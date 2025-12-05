@@ -32,7 +32,7 @@ void DeepBKZ (Matrix &B, int beta, const Scalar delta){
     /* --- 引数チェック完了 */
     int n = B.rows(); // 次元を n とする
 
-    LLL(B, delta); // まずは大まかにLLLで簡約する
+    LLL(B, 0.75); // まずは大まかにLLLで簡約する ここはざっくりでいいのでわざと delta ではなく 0.75 と少し余裕をもたせる
     DeepLLL(B, delta); // DeepLLL簡約で基底を更新する
 
     //ここで, LLL簡約後の GSO 情報を保存したい
@@ -119,6 +119,23 @@ void DeepBKZ (Matrix &B, int beta, const Scalar delta){
             if(B_norm(k) - proj_v_sq_norm > MULTI_PRECISION_EPSILON){
                 z = 0; // カウンターを 0 にセット
 
+#if 0 // MLLLを回避するやり方 精度を上げてMLLLが不安定となった場合切り替える
+
+                Vector temp_row = B.row(n - 1);
+                for (int i = n - 1; i > k; i--){
+                    B.row(i) = B.row(i - 1); // 後ろにシフトさせる
+                }
+
+                B.row(k) = v_lattice; // k 番目の位置に新しい最短ベクトル v を挿入する
+
+                DeepLLL(B, delta); // DeepLLL で先頭へ最短ベクトルを配置させる
+                
+
+#endif
+
+
+
+#if 1 //MLLLを使う場合                
                 // MLLL を呼び出すための準備
                 Matrix B_h_added_v(h + 1, B.cols()); // b_0 ~ b_{h-1} に加えて v があるので h + 1 個の要素がある
                 int idx = 0;
@@ -134,6 +151,7 @@ void DeepBKZ (Matrix &B, int beta, const Scalar delta){
                 for (int i = 0; i < h; i++){ // B_h_added_v.row(h) は 0 ベクトル
                     B.row(i) = B_h_added_v.row(i);
                 }
+#endif
                 Gram_Schmidt(B, B_star, U); // OPTIMIZE: 最終的にはGSOUpdate-BKZを実装して差し替える
             }else{
                 goto NO_UPDATE;
