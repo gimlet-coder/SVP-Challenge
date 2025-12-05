@@ -28,6 +28,15 @@
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\ENUM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\BKZ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\scanning_lattice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\ENUM_fast.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="A:\Github_SVP\SVP-Challenge\CMakeLists.txt" />

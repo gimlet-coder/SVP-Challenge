@@ -422,6 +422,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\Size-reduce_partial.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\MLLL.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\ENUM.cpp" />
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\BKZ.cpp" />
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\scanning_lattice.cpp" />
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\ENUM_fast.cpp" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
