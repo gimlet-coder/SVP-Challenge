@@ -69,10 +69,10 @@ static void save_current_state(const Matrix &B, int n, int beta, const Scalar be
     outfile << "--- Basis Matrix B (n x n) ---" << std::endl;
     
     // 基底行列 B の出力
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; i++) {
         // 各行ベクトルを [] で囲んで出力（読み込み関数が処理しやすいように）
         outfile << "[";
-        for (int j = 0; j < n; ++j) {
+        for (int j = 0; j < n; j++) {
             // 多倍長精度を活かして正確な値をスペース区切りで出力
             outfile << B(i, j) << (j < n - 1 ? " " : "");
         }
