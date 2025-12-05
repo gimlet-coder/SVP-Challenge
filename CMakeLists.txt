@@ -22,6 +22,7 @@ set(MAIN_SOURCES
     MLLL.cpp
     ENUM.cpp
     BKZ.cpp
+    scanning_lattice.cpp
 )
 add_executable(main ${MAIN_SOURCES})
 # -------------------------------------------------------------
