@@ -73,8 +73,9 @@ static void save_current_state(const Matrix &B, int n, int beta, const Scalar be
         // 各行ベクトルを [] で囲んで出力（読み込み関数が処理しやすいように）
         outfile << "[";
         for (int j = 0; j < n; j++) {
-            // 多倍長精度を活かして正確な値をスペース区切りで出力
-            outfile << B(i, j) << (j < n - 1 ? " " : "");
+            // 多倍長浮動小数点から整数への丸め込み
+            long long component = static_cast<long long>(B(i, j));
+            outfile << component << (j < n - 1 ? " " : "");
         }
         outfile << "]" << std::endl;
     }
@@ -209,7 +210,7 @@ void Progressive_BKZ(const std::string &filename, int n, int start_beta, int max
 
                 best_norm_sq = current_sq;
                 Global_B_best = B;
-                save_current_state(Global_B_best, n, -1, Global_best_norm_sq, "lattice_state_50d"); // ここの 50 は次元を変えるたびに変更したほうがいい
+                save_current_state(Global_B_best, n, -1, Global_best_norm_sq, "lattice_state_51d"); // ここの 51 は次元を変えるたびに変更したほうがいい
             std::cout << "\n!!! NEW GLOBAL RECORD FOUND: " << std::sqrt(static_cast<double>(Global_best_norm_sq)) << " !!!\n";
             
                 best_norm_sq = current_sq;
