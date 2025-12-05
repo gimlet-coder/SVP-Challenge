@@ -37,6 +37,12 @@
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\ENUM_fast.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\Progressive_BKZ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\DeepBKZ.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="A:\Github_SVP\SVP-Challenge\CMakeLists.txt" />

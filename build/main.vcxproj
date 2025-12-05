@@ -425,6 +425,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\BKZ.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\scanning_lattice.cpp" />
     <ClCompile Include="A:\Github_SVP\SVP-Challenge\ENUM_fast.cpp" />
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\Progressive_BKZ.cpp" />
+    <ClCompile Include="A:\Github_SVP\SVP-Challenge\DeepBKZ.cpp" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
