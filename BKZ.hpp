@@ -49,3 +49,10 @@ void LLL(Matrix &B, const Scalar delta);
   * @param k_begin, k_end [in] 探索範囲 変更無し
   * @param node_count [out] 最短ベクトルを探すのにかかったノード数を保存する
   */
+
+bool ENUM_fast(const Matrix &U, const Vector &B_norm, const Vector &R_squares, Vector &v_out, const int k_begin, const int k_end, long long &node_count);
+
+/**
+ * @brief ENUMの内部計算を Scalar から long double に変えたもの
+ * パラメータや本質はENUMと全く同じ
+ */

@@ -97,7 +97,7 @@ void BKZ (Matrix &B, int beta, const Scalar delta){
 
         Vector v_coeffs; // 部分射影格子 L 上の最短な非ゼロベクトルの係数ベクトルの保存先
         long long node_count = 0; // ENUMでどのくらいのノード数を要したか保存する
-        bool found = ENUM(U, B_norm ,pruning_bounds ,v_coeffs , k, l, node_count);
+        bool found = ENUM_fast(U, B_norm ,pruning_bounds ,v_coeffs , k, l, node_count);
 
         
         if(found){

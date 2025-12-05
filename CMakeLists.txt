@@ -23,6 +23,7 @@ set(MAIN_SOURCES
     ENUM.cpp
     BKZ.cpp
     scanning_lattice.cpp
+    ENUM_fast.cpp
 )
 add_executable(main ${MAIN_SOURCES})
 # -------------------------------------------------------------
