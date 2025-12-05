@@ -21,6 +21,7 @@ set(MAIN_SOURCES
     Size-reduce_partial.cpp
     MLLL.cpp
     ENUM.cpp
+    BKZ.cpp
 )
 add_executable(main ${MAIN_SOURCES})
 # -------------------------------------------------------------
