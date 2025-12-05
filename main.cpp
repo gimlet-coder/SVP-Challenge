@@ -28,13 +28,13 @@ int main(){
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
 
-    int n = 50;
+    int n = 51;
     std::string filename = "lattice_file.txt";
 
     int start_beta = 20;
-    int max_data = 50;
-    Scalar delta = 0.99;
-    double target_norm = 1473;
+    int max_data = 51;
+    Scalar delta = 0.999;
+    double target_norm = 1589;
     int max_retries = 10;
     Progressive_BKZ(filename, n, start_beta, max_data, delta, target_norm, max_retries);
     return 0;
