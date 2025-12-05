@@ -24,6 +24,8 @@ set(MAIN_SOURCES
     BKZ.cpp
     scanning_lattice.cpp
     ENUM_fast.cpp
+    Progressive_BKZ.cpp
+    DeepBKZ.cpp
 )
 add_executable(main ${MAIN_SOURCES})
 # -------------------------------------------------------------

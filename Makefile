@@ -25,7 +25,7 @@ INCLUDES = -I$(EIGEN_PATH) -I$(BOOST_PATH)
 TARGET = svp_solver
 
 # ソースファイル
-SRCS = main.cpp Gram_Schmidt.cpp lagrange_basis_reduction.cpp Size-reduce.cpp Size-reduce_partial.cpp GSOUpdate-LLL_partial.cpp LLL.cpp GSOUpdate-DeepLLL_partial.cpp DeepLLL.cpp MLLL.cpp ENUM.cpp BKZ.cpp scanning_lattice.cpp ENUM_fast.cpp
+SRCS = main.cpp Gram_Schmidt.cpp lagrange_basis_reduction.cpp Size-reduce.cpp Size-reduce_partial.cpp GSOUpdate-LLL_partial.cpp LLL.cpp GSOUpdate-DeepLLL_partial.cpp DeepLLL.cpp MLLL.cpp ENUM.cpp BKZ.cpp scanning_lattice.cpp ENUM_fast.cpp Progressive_BKZ.cpp DeepBKZ.cpp
 
 # オブジェクトファイル
 OBJS = $(SRCS:.cpp=.o)
