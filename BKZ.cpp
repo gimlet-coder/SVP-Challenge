@@ -6,6 +6,8 @@
 #include <Eigen/Dense>
 #include <cmath> // std::fabs() (絶対値の計算) std::round() に用いる 
 #include <stdexcept> // std::out_of_range のために必要
+#include <iomanip> //  表示の整形用
+#include <chrono>  //  時間計測用
 
 #include "BKZ.hpp"
 #include "lattice_types.hpp" 
@@ -40,18 +42,62 @@ void BKZ (Matrix &B, int beta, const Scalar delta){
     for(int i = 0; i < n; i++){
         B_norm(i) = B_star.row(i).squaredNorm();
     }
-
-    Scalar b1_sq_norm = B.row(0).squaredNorm();
     int z = 0, k = -1; // ここで, k を 0-based に変更する z はあくまでカウンターなので 0 でOK
 
+    //進捗状況確認ツール
+    auto last_print_time = std::chrono::steady_clock::now();
+    long long iteration_count = 0;
+
     while(z < n - 1){
+
+        // 時間をチェックして一定間隔でのみ出力する
+        iteration_count++;
+        auto now = std::chrono::steady_clock::now();
+
+        // 100ミリ秒 (0.1秒) 以上経過していたら表示を更新
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - last_print_time).count() > 100) {
+            
+            // 進捗バーの作成 (現在の k_idx の位置を視覚化)
+            int bar_width = 20; 
+            int pos = (z * bar_width) / n;
+            std::string progress_bar = "[" + std::string(pos, '#') + std::string(bar_width - pos, ' ') + "]";
+
+            // 第1ベクトルの長さ(ノルム)を表示用にdoubleにキャスト
+            // (多倍長型のままだとstd::scientificなどが効かない場合がある)
+            double current_norm = 0.0;
+            try {
+                // ルートを取って長さにする
+                current_norm = static_cast<double>(boost::multiprecision::sqrt(B.row(0).squaredNorm()));
+            } catch (...) {
+                current_norm = -1.0; // エラー時は-1表示
+            }
+
+            // std::cerr に出力 (標準出力 std::cout は計算結果用にとっておく)
+            std::cerr << "\r" // 行頭に戻る
+                      << "Iter: " << std::setw(8) << iteration_count 
+                      << " | k: " << std::setw(3) << k + 1 << "/" << n 
+                      << " " << progress_bar 
+                      << " | ||b_0||: " << std::scientific << std::setprecision(4) << current_norm
+                      << std::flush; // バッファを強制出力して即座に表示
+
+            last_print_time = now;
+        }
+
         k = (k + 1) % (n - 1);
         int l = std::min(k + beta - 1, n - 1);
         int h = std::min(l + 1, n);
-        Scalar R_square = b1_sq_norm * 0.99;
+        Scalar searching_radius = B_norm(k) * 0.99; // 基準の探索半径
+        int block_dim = l - k + 1; // ブロックの次元数
+        Vector pruning_bounds(block_dim); // 剪定(= 枝刈り)の境界
+
+        for (int i = 0; i < block_dim; i++){
+            double ratio = static_cast<double> (i + 1) / block_dim;
+            pruning_bounds(i) = searching_radius * Scalar(ratio);
+        }
+
         Vector v_coeffs; // 部分射影格子 L 上の最短な非ゼロベクトルの係数ベクトルの保存先
         long long node_count = 0; // ENUMでどのくらいのノード数を要したか保存する
-        bool found = ENUM(U, B_norm ,R_square ,v_coeffs , k, l, node_count);
+        bool found = ENUM(U, B_norm ,pruning_bounds ,v_coeffs , k, l, node_count);
 
         
         if(found){
@@ -100,4 +146,5 @@ void BKZ (Matrix &B, int beta, const Scalar delta){
             }
         }
     }
+    std::cerr <<std::endl;
 }
