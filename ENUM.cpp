@@ -5,11 +5,13 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <limits>
+#include <iomanip> //  表示の整形用
+#include <chrono>  //  時間計測用
 
 
 #include "lattice_types.hpp"
 
-bool ENUM(const Matrix &U, const Vector &B_norm, Scalar &R_square, Vector &v_out, const int k_begin, const int k_end, long long &node_count){
+bool ENUM(const Matrix &U, const Vector &B_norm, const Vector &R_squares, Vector &v_out, const int k_begin, const int k_end, long long &node_count){
     const int n_rows = static_cast<int>(U.rows());
     const int n_cols = static_cast<int>(U.cols());
 
@@ -48,15 +50,39 @@ bool ENUM(const Matrix &U, const Vector &B_norm, Scalar &R_square, Vector &v_out
     int last_nonzero = 1; // step.7
     int k = n;            // step.8: 根 (k を増やして葉へ)
 
+    // --- 進捗表示用の変数 ---
+    auto start_time = std::chrono::steady_clock::now();
+    auto last_print_time = start_time;
+
     while(true){ // step.9
         node_count++;
+        // --- 進捗表示ロジック ---
+        // 2^16回に1回チェックする
+        if ((node_count & 0xFFFF) == 0) { 
+            auto now = std::chrono::steady_clock::now();
+            // 前回の表示から0.5秒以上経過していたら出力
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(now - last_print_time).count() > 500) {
+                double elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start_time).count();
+                double nps = node_count / (elapsed + 1e-9); // nodes per second
+
+                std::cerr << "\r" // 同じ行を上書き
+                          << "[ENUM] Nodes: " << std::setw(10) << node_count 
+                          << " | Depth(k): " << std::setw(2) << k // 現在の探索深さ
+                          << " | Speed: " << std::scientific << std::setprecision(2) << nps << " n/s"
+                          << std::flush;
+                
+                last_print_time = now;
+            }
+        }
+
+
         const int global_k = k + k_begin - 1;
         Scalar diff = static_cast<Scalar>(v_temp(k - 1)) - c(k - 1);
 
         rho(k) = rho(k + 1) + diff * diff * B_norm(global_k); // step.10
 
 
-        if(rho(k) <= R_square){ // step.11
+        if(rho(k) <= R_squares(k - 1)){ // step.11
             if (k == 1) { // 葉 k = 1
                 // 0 ベクトルは捨てて次候補へ
                 bool all_zero = true;
@@ -68,16 +94,8 @@ bool ENUM(const Matrix &U, const Vector &B_norm, Scalar &R_square, Vector &v_out
                 }
                 if (!all_zero) { // 非零ベクトル発見
                     v_out = v_temp.cast<Scalar>();
-                    R_square = rho(k);
-                    FLAG_found = true;
-std::cerr << "見つかったノルム: " << R_square << " (Nodes: " << node_count << ")" << std::endl;
-                    if (v_temp(k - 1) >= c(k - 1)){
-                        v_temp(k - 1) += w_int(k - 1);
-                    }else{
-                        v_temp(k - 1) -= w_int(k - 1);
-                    }
-                    w_int(k - 1)++;
-                    continue;
+std::cerr << "\n見つかったノルム: " << R_squares(k - 1) << " (Nodes: " << node_count << ")" << std::endl;
+                    return true;
                 }
                 // 0 ベクトルなら次の候補へ step.33 ~ 38 と同じ処理を行う
                 if (v_temp(k - 1) > c(k - 1)){
