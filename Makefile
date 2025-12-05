@@ -2,7 +2,7 @@
 CXX = g++
 
 # コンパイルフラグ
-CXXFLAGS = -std=c++17 -Wall -g
+CXXFLAGS = -std=c++17 -Wall -O3 -g
 
 # --- ライブラリのパス設定 (デフォルト値) ---
 # ?= を使うことで、ユーザーが make EIGEN_PATH=... と指定した場合に上書き可能になります
@@ -25,7 +25,7 @@ INCLUDES = -I$(EIGEN_PATH) -I$(BOOST_PATH)
 TARGET = svp_solver
 
 # ソースファイル
-SRCS = main.cpp Gram_Schmidt.cpp lagrange_basis_reduction.cpp Size-reduce.cpp Size-reduce_partial.cpp GSOUpdate-LLL_partial.cpp LLL.cpp GSOUpdate-DeepLLL_partial.cpp DeepLLL.cpp MLLL.cpp ENUM.cpp BKZ.cpp scanning_lattice.cpp
+SRCS = main.cpp Gram_Schmidt.cpp lagrange_basis_reduction.cpp Size-reduce.cpp Size-reduce_partial.cpp GSOUpdate-LLL_partial.cpp LLL.cpp GSOUpdate-DeepLLL_partial.cpp DeepLLL.cpp MLLL.cpp ENUM.cpp BKZ.cpp scanning_lattice.cpp ENUM_fast.cpp
 
 # オブジェクトファイル
 OBJS = $(SRCS:.cpp=.o)
