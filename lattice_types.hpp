@@ -6,6 +6,8 @@
 
 
 #include <Eigen/Dense>
+#include <string>
+
 
 
 
@@ -47,3 +49,12 @@ using boost::multiprecision::floor;
 using boost::multiprecision::ceil;
 using boost::multiprecision::sqrt;
 using boost::multiprecision::pow;
+
+
+// --- 5. lattice file を読み取る関数 ---
+Matrix load_challenge_matrix(const std::string &filename, int rows, int cols);
+/**
+ * @brief filename の lattice を読み込んで B として返す関数
+ * @param filename [in] lattice の保存しているファイル名を入れる
+ * @param rows, cols [in] それぞれ行数と列数を表す
+ */
