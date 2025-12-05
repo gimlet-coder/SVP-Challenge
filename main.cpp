@@ -21,6 +21,55 @@
 #include "main.hpp"
 
 
+#if 1
+
+int main(){
+    SetConsoleOutputCP(65001);
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(NULL);
+
+    int n = 40; // 次元を指定
+    Matrix B(n, n);
+    // lattice_file.txt から行列を読み込みたい
+    std::string filename = "lattice_file.txt";
+    std::cout << "以下のファイルから行列を取得中 --- " << filename << " ---" << std::endl;
+    try{
+
+        Matrix B = load_challenge_matrix(filename, n, n);
+        std::cout << "--- Initial Basis (First row) ---" << std::endl;
+        // うまく読み込みできているか最初の行で呼び出しをかけてみる
+        std::cout << B.row(0) << std::endl; 
+        std::cout << "||b_1||^2 = " << B.row(0).squaredNorm() << std::endl;
+
+        // BKZのパラメータ設定
+        // n = 40 なので beta = 40 が最強設定
+        int beta = 40; 
+        Scalar delta = 0.99;
+
+        std::cout << "\nBKZ(beta=" << beta << ", delta=" << delta << ") を実行中..." << std::endl;
+
+        auto start_time = std::chrono::high_resolution_clock::now(); // ここから計測を始める
+        BKZ(B, beta, delta);
+        auto end_time = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+        std::cout << "\n--- BKZ実行後 ---" << std::endl;
+        Scalar b1_sq = B.row(0).squaredNorm();
+        std::cout << "||b_1||^2 = " << b1_sq << std::endl;
+        std::cout << "\n--- BKZ 実行時間 ---\n";
+        std::cout << "実行時間: " << duration.count() << " ms (" << static_cast<double>(duration.count()) / 1000.0 << " s)\n";
+        std::cout << "------------------------\n\n";
+        std::cout << "\n簡約基底 B:\n" << B << std::endl;
+    }catch (const std::exception& e) {
+        std::cerr << "エラーが発生しました: " << e.what() << std::endl;
+        return 1;
+    }
+    return 0;
+}
+
+#endif
+
+
 #if 0
 
 int main() {
@@ -98,7 +147,7 @@ int main() {
 #endif
 
 
-#if 1
+#if 0
 // DeepLLLの動作確認用
 int main() {
     SetConsoleOutputCP(65001); // このコードの出力文字コードを UTF-8 に強制

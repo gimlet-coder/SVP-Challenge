@@ -78,3 +78,14 @@ void MLLL(Matrix &B, const Scalar delta);
   * @param k_begin, k_end [in] 探索範囲 変更無し
   * @param node_count [out] 最短ベクトルを探すのにかかったノード数を保存する
   */
+
+
+void BKZ(Matrix &B, int beta, const Scalar delta);
+
+/**
+ * @brief BKZ基底簡約アルゴリズム
+ * @param beta [in] ブロックサイズ (2 <= beta <= n) 変更無し
+ * @param delta [in] LLLの簡約パラメータ (1/4 < delta < 1) 変更無し
+ */
+
+ 
