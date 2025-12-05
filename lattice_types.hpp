@@ -11,10 +11,11 @@
 
 
 // --- 1. 多倍長精度 (Scalar) の型を定義 ---
-using Scalar = boost::multiprecision::cpp_dec_float_100; // 100桁精度の多倍長浮動小数点数
+using FloatBackend = boost::multiprecision::cpp_dec_float<200>;
+using Scalar = boost::multiprecision::number<FloatBackend>; // 200桁精度の多倍長浮動小数点数
 
 
-const Scalar MULTI_PRECISION_EPSILON = Scalar("1e-90"); // 90桁までを信頼する
+const Scalar MULTI_PRECISION_EPSILON = Scalar("1e-190"); // 190桁までを信頼する
 
 // --- 2. Eigen が Scalar 型を認識できるようにする「おまじない」 ---
 namespace Eigen {
