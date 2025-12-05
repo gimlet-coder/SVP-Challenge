@@ -88,4 +88,14 @@ void BKZ(Matrix &B, int beta, const Scalar delta);
  * @param delta [in] LLLの簡約パラメータ (1/4 < delta < 1) 変更無し
  */
 
- 
+void Progressive_BKZ(const std::string& filename, int n, int start_beta, int max_beta, Scalar delta, double target_norm, int max_retries);
+
+/**
+ * @brief ProgressiveBKZアルゴリズム
+ * @param filename [in] 読み込ませたい行列のファイル名を入れる 変更無し
+ * @param n [in] 行列サイズ
+ * @param start_beta, max_beta [in] それぞれ beta のスタート値と最大値を入力する
+ * @param delta [in] LLL の簡約パラメータ
+ * @param target_norm [in] 既に既知のデータを扱う場合、おおよその最小ノルムを入力してそこを目指して計算させる
+ * @param max_retries [in] 繰り返し計算する上限回数
+ */
