@@ -251,7 +251,7 @@ void Progressive_BKZ(const std::string &filename, int n, int start_beta, int max
                 best_norm_sq = current_sq;
                 Global_best_norm_sq = current_sq;
                 Global_B_best = B;
-                save_current_state(Global_B_best, n, -1, Global_best_norm_sq, "lattice_state_40d"); // ここの 40 は次元を変えるたびに変更したほうがいい
+                save_current_state(Global_B_best, n, -1, Global_best_norm_sq, "lattice_state_80d"); // ここの 80 は次元を変えるたびに変更したほうがいい
             std::cout << "\n!!! NEW GLOBAL RECORD FOUND: " << std::sqrt(static_cast<double>(Global_best_norm_sq)) << " !!!\n";
             
                 best_norm_sq = current_sq;
