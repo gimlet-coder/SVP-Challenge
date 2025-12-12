@@ -32,7 +32,9 @@ void DeepBKZ (IntMatrix &B, int beta, const Real delta){
     /* --- 引数チェック完了 */
     int n = B.rows(); // 次元を n とする
 #ifdef _WIN32 // windows環境ではfplllができないのでここで軽く簡約させる
+std::cout << "Windows環境で実行しています LLL開始" << std::endl;
     LLL(B, 0.75); // まずは大まかにLLLで簡約する ここはざっくりでいいのでわざと delta ではなく 0.75 と少し余裕をもたせる
+std::cout << "LLL完了 ---> DeepLLL開始" << std::endl;
     DeepLLL(B, delta); // DeepLLL簡約で基底を更新する
 #endif
     //ここで, LLL簡約後の GSO 情報を保存したい
