@@ -23,9 +23,9 @@
 
 const std::string FILE_NAME = "lattice.txt"; // スクリプトが出力するファイル名と合わせる
 
-const int DIM = 40; // 次元を入力
+const int DIM = 80; // 次元を入力
 
-const int MAX_BETA = 40;
+const int MAX_BETA = 60;
 const Real DELTA = 0.999;
 const double TARGET_NORM = 2100.0; // 64次元の一番下の記録よりは超えたい
 
