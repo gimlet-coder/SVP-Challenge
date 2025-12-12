@@ -15,7 +15,7 @@
 #include "MLLL.hpp"
 
 
-void MLLL(Matrix &B, const Scalar delta){
+void MLLL(IntMatrix &B, const Real delta){
     if(delta < 0.25 || 1 <= delta){
         throw std::out_of_range("Size-reduce 不正なインデックス delta です (1/4 < delta < 1)");
     }
@@ -23,16 +23,17 @@ void MLLL(Matrix &B, const Scalar delta){
 
     /* Step 1 */
     int h = B.rows(), n = B.cols(), z = h - 1, g = 0;
-    Matrix B_star(h, n), U(h, h); // GSOを求める際の受け皿
+    RealMatrix B_star(h, n), U(h, h); // GSOを求める際の受け皿
     U.setZero();
-    Vector B_sq_norm(h); // 疑似コードでいうところの B (B_i = ||b^*_i||^2) にあたるもの
+    RealVector B_sq_norm(h); // 疑似コードでいうところの B (B_i = ||b^*_i||^2) にあたるもの
     bool FLAG_startagain = false;
     while(g <= z){
         //step.5
-        B_star.row(g) = B.row(g);
+        RealVector b_g_real = B.row(g).cast<Real>();
+        B_star.row(g) = b_g_real;
         for (int j = 0; j < g; j++){
             if(B_sq_norm(j) > MULTI_PRECISION_EPSILON){// ゼロ除算対策
-                U(g, j) = B.row(g).dot(B_star.row(j)) / B_sq_norm(j);
+                U(g, j) = b_g_real.dot(B_star.row(j)) / B_sq_norm(j);
             }else{
                 U(g, j) = 0;
             }
@@ -51,8 +52,8 @@ void MLLL(Matrix &B, const Scalar delta){
             FLAG_startagain = false;
             while(k <= l && !FLAG_startagain){
                 Size_reduce_partial(B, U, k, k - 1); //step.14
-                Scalar nu = U(k, k - 1);
-                Scalar B_proj = B_sq_norm(k) + nu * nu * B_sq_norm(k - 1);
+                Real nu = U(k, k - 1);
+                Real B_proj = B_sq_norm(k) + nu * nu * B_sq_norm(k - 1);
 
 
                 if(B_proj >= delta * B_sq_norm(k - 1) - MULTI_PRECISION_EPSILON){ // step.15 Lovasz 条件
@@ -61,8 +62,9 @@ void MLLL(Matrix &B, const Scalar delta){
                     }
                     k++;
                 }else{ //step.16
+                    Real current_norm_sq = B.row(k).cast<Real>().squaredNorm();
                     /* step.17 */
-                    if(B.row(k).squaredNorm() < MULTI_PRECISION_EPSILON){ //上記同様浮動小数の誤差対策で判定基準を設ける
+                    if(current_norm_sq < MULTI_PRECISION_EPSILON){ //上記同様浮動小数の誤差対策で判定基準を設ける
                         if(k < z){                            
                             B.row(k).swap(B.row(z));
                         }
@@ -86,9 +88,9 @@ void MLLL(Matrix &B, const Scalar delta){
                                 }
                             }else{
                                 //step.28
-                                Scalar t = B_sq_norm(k - 1) / B_proj;
+                                Real t = B_sq_norm(k - 1) / B_proj;
                                 U(k, k - 1) = nu * t;
-                                Vector w = B_star.row(k - 1);
+                                RealVector w = B_star.row(k - 1);
                                 B_star.row(k - 1) = B_star.row(k) + nu * w.transpose();
                                 B_sq_norm(k - 1) = B_proj;
                                 if(k <= l){
@@ -96,7 +98,7 @@ void MLLL(Matrix &B, const Scalar delta){
                                     B_sq_norm(k) *= t;
                                 }// ここまで step.28
                                 for (int i = k + 1; i <= l; i++){
-                                    Scalar temp = U(i, k);
+                                    Real temp = U(i, k);
                                     U(i, k) = U(i, k - 1) - nu * temp;
                                     U(i, k - 1) = temp + U(k, k - 1) * U(i, k);
                                 }

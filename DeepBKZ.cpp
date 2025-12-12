@@ -22,7 +22,7 @@ hoge.dot(huga) は hoge と huga の内積を表す
 hoge.squaredNorm() はベクトルの長さの2乗を表す
 */
 
-void DeepBKZ (Matrix &B, int beta, const Scalar delta){
+void DeepBKZ (IntMatrix &B, int beta, const Real delta){
     if(delta < 0.25 || 1 <= delta){
         throw std::out_of_range("Size-reduce 不正なインデックス delta です (1/4 < delta < 1)");
     }
@@ -31,16 +31,16 @@ void DeepBKZ (Matrix &B, int beta, const Scalar delta){
     }
     /* --- 引数チェック完了 */
     int n = B.rows(); // 次元を n とする
-
+#ifdef _WIN32 // windows環境ではfplllができないのでここで軽く簡約させる
     LLL(B, 0.75); // まずは大まかにLLLで簡約する ここはざっくりでいいのでわざと delta ではなく 0.75 と少し余裕をもたせる
     DeepLLL(B, delta); // DeepLLL簡約で基底を更新する
-
+#endif
     //ここで, LLL簡約後の GSO 情報を保存したい
 
-    Matrix B_star, U; // GSO 情報の受け皿
+    RealMatrix B_star, U; // GSO 情報の受け皿
     Gram_Schmidt(B, B_star, U);
 
-    Vector B_norm(n);
+    RealVector B_norm(n);
     for(int i = 0; i < n; i++){
         B_norm(i) = B_star.row(i).squaredNorm();
     }
@@ -88,28 +88,29 @@ void DeepBKZ (Matrix &B, int beta, const Scalar delta){
         k = (k + 1) % (n - 1);
         int l = std::min(k + beta - 1, n - 1);
         int h = std::min(l + 1, n);
-        Scalar searching_radius = B_norm(k) * 0.99; // 基準の探索半径
+        Real searching_radius = B_norm(k) * 0.99; // 基準の探索半径
         int block_dim = l - k + 1; // ブロックの次元数
-        Vector pruning_bounds(block_dim); // 剪定(= 枝刈り)の境界
+        RealVector pruning_bounds(block_dim); // 剪定(= 枝刈り)の境界
 
         for (int i = 0; i < block_dim; i++){
             double ratio = static_cast<double> (i + 1) / block_dim;
-            pruning_bounds(i) = searching_radius * Scalar(ratio);
+            pruning_bounds(i) = searching_radius * static_cast<Real>(ratio);
         }
 
-        Vector v_coeffs; // 部分射影格子 L 上の最短な非ゼロベクトルの係数ベクトルの保存先
+        IntVector v_coeffs; // 部分射影格子 L 上の最短な非ゼロベクトルの係数ベクトルの保存先
         long long node_count = 0; // ENUMでどのくらいのノード数を要したか保存する
         bool found = ENUM_fast(U, B_norm ,pruning_bounds ,v_coeffs , k, l, node_count);
 
         
         if(found){
-            Vector v_lattice = Vector::Zero(B.cols());
+            IntVector v_lattice = IntVector::Zero(B.cols());
             for (int i = 0; i < v_coeffs.size(); i++){
-                v_lattice += static_cast<Scalar>(v_coeffs(i)) * B.row(k + i);
+                v_lattice += v_coeffs(i) * B.row(k + i);
             }
-            Scalar proj_v_sq_norm = v_lattice.squaredNorm();
+            RealVector v_lat_real = v_lattice.cast<Real>();
+            Real proj_v_sq_norm = v_lat_real.squaredNorm();
             for (int i = 0; i < k; i++){
-                Scalar mu_v_j = v_lattice.dot(B_star.row(i)) / B_norm(i); // <v, b*_j> / ||B_i||
+                Real mu_v_j = v_lat_real.dot(B_star.row(i)) / B_norm(i); // <v, b*_j> / ||B_i||
                 proj_v_sq_norm -= mu_v_j * mu_v_j * B_norm(i); // 射影成分を除く
             }
             if(proj_v_sq_norm < MULTI_PRECISION_EPSILON){ // 計算誤差分よりも小さい場合は 0 とする
@@ -121,7 +122,7 @@ void DeepBKZ (Matrix &B, int beta, const Scalar delta){
 
 #if 0 // MLLLを回避するやり方 精度を上げてMLLLが不安定となった場合切り替える
 
-                Vector temp_row = B.row(n - 1);
+                IntVector temp_row = B.row(n - 1);
                 for (int i = n - 1; i > k; i--){
                     B.row(i) = B.row(i - 1); // 後ろにシフトさせる
                 }
@@ -137,7 +138,7 @@ void DeepBKZ (Matrix &B, int beta, const Scalar delta){
 
 #if 1 //MLLLを使う場合                
                 // MLLL を呼び出すための準備
-                Matrix B_h_added_v(h + 1, B.cols()); // b_0 ~ b_{h-1} に加えて v があるので h + 1 個の要素がある
+                IntMatrix B_h_added_v(h + 1, B.cols()); // b_0 ~ b_{h-1} に加えて v があるので h + 1 個の要素がある
                 int idx = 0;
                 for (int i = 0; i < h + 1; i++){
                     if(i == k){

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 #include <set>
 #include <cmath>
 #include <random>
@@ -10,14 +11,79 @@
 #include <iomanip>
 #include <stdexcept>
 
+#include <gmp.h>
+#ifdef __linux__
+#include <fplll/bkz.h>
+#include <fplll/lll.h>
+#endif
+
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "lattice_types.hpp"
 #include "Progressive_BKZ.hpp"
+
+#ifdef __linux__
+/*----------------------------------------------------------------------------
+ Eigen <-> fplll 変換ヘルパ
+/ ----------------------------------------------------------------------------
+*/
+static void eigen_to_fplll(const IntMatrix &B, fplll::ZZ_mat<mpz_t> &Z) {
+    int rows = B.rows();
+    int cols = B.cols();
+    Z.resize(rows, cols);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            // Integer (cpp_int) -> string -> mpz_t
+            std::string v = B(i, j).str();
+            if (mpz_set_str(Z(i, j).get_data(), v.c_str(), 10) != 0) {
+                throw std::runtime_error("mpz_set_str failed");
+            }
+        }
+    }
+}
+
+static void fplll_to_eigen(const fplll::ZZ_mat<mpz_t> &Z, IntMatrix &B) {
+    int rows = Z.get_rows();
+    int cols = Z.get_cols();
+    B.resize(rows, cols);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            char *s = mpz_get_str(nullptr, 10, Z(i, j).get_data());
+            B(i, j) = Integer(s);
+            free(s);
+        }
+    }
+}
+
+static bool run_fplll_bkz(IntMatrix &B, int beta, double delta) {
+    fplll::ZZ_mat<mpz_t> Z;
+    eigen_to_fplll(B, Z);
+
+    std::vector<fplll::Strategy> strategies;
+    try {
+        std::string strat_path = fplll::strategy_full_path(fplll::default_strategy());
+        strategies = fplll::load_strategies_json(strat_path);
+    } catch (...) {
+        // 戦略ファイルが見つからない場合は空の戦略を用意
+        strategies.emplace_back(fplll::Strategy::EmptyStrategy(beta));
+    }
+
+    fplll::BKZParam params(beta, strategies, delta, fplll::BKZ_DEFAULT, 1);
+    int rc = fplll::bkz_reduction(&Z, nullptr, params);
+    if (rc != 0) {
+        return false;
+    }
+
+    fplll_to_eigen(Z, B);
+    return true;
+}
+#endif
 
 /* ----------------------------------------------------------------------------
  基底のランダム化 (Unimodular変換) //あえて行列をほどよく汚して再度簡約させてみる
 / ----------------------------------------------------------------------------
 */
-static void randomize_basis(Matrix &B, int num_operations) {
+static void randomize_basis(IntMatrix &B, int num_operations) {
     int n = B.rows();
     std::random_device rd;
     std::mt19937 gen(rd()); // 適当な乱数を生成
@@ -44,7 +110,7 @@ static void randomize_basis(Matrix &B, int num_operations) {
 */
 
 
-static void save_current_state(const Matrix &B, int n, int beta, const Scalar best_norm_sq, const std::string &prefix) {
+static void save_current_state(const IntMatrix &B, int n, int beta, const Real best_norm_sq, const std::string &prefix) {
     // ファイル名: [prefix]_beta_[beta].txt の形式
     // Global Best Record の場合は beta の代わりに "best" を使う
     std::string beta_str = (beta == -1) ? "best" : std::to_string(beta);
@@ -56,8 +122,8 @@ static void save_current_state(const Matrix &B, int n, int beta, const Scalar be
         return;
     }
 
-    // ノルムは二乗ノルムとして格納 (多倍長 Scalar 型)
-    Scalar b1_norm_sq = B.row(0).squaredNorm();
+    // ノルムは二乗ノルムとして格納 (多倍長 Real 型)
+    Real b1_norm_sq = B.row(0).cast<Real>().squaredNorm();
     double current_norm = std::sqrt(static_cast<double>(b1_norm_sq));
 
     outfile << "--- Progressive BKZ State Save ---" << std::endl;
@@ -89,58 +155,16 @@ static void save_current_state(const Matrix &B, int n, int beta, const Scalar be
  データの読み込み
 / ----------------------------------------------------------------------------
 */
-static void load_and_clean_data(const std::string &filename, int n, Matrix &B){
+static void load_data(const std::string &filename, int n, IntMatrix &B){
     if (n <= 0) {
         throw std::invalid_argument("次元 n は 1 以上である必要があります。");
     }
     // scanning_lattice.cpp の機能を使って、ファイルから全てのデータを読み込む
     // n x n の行列としてファイルから読み込みをする
-    Matrix B_full = load_challenge_matrix(filename, n, n);
+    B = load_challenge_matrix(filename, n, n);
 
-    // 2. ゼロベクトルと重複ベクトルのチェックと削除
-    std::vector<Vector> unique_vectors;
-    // Set を使って、ベクトルの重複をチェックする
-    std::set<std::string> seen_vectors; 
-
-    for (int i = 0; i < n; i++) {
-        Vector current_row = B_full.row(i);
-        
-        // a. ゼロベクトルチェック
-        if (current_row.squaredNorm() < MULTI_PRECISION_EPSILON) {
-            continue; // ゼロベクトルはスキップ
-        }
-
-        // b. 重複チェック: ベクトルを行列要素を文字列に変換してSetで管理
-        // 正確な比較のため、高精度なScalar型を文字列に変換して比較
-        std::stringstream ss;
-        ss << std::fixed << std::setprecision(20); // 高精度で出力
-        for (int j = 0; j < n; j++) {
-            ss << current_row(j) << ",";
-        }
-        std::string vector_str = ss.str();
-
-        if (seen_vectors.find(vector_str) == seen_vectors.end()) {
-            // 重複がない場合
-            seen_vectors.insert(vector_str);
-            unique_vectors.push_back(current_row);
-        }
-    }
-
-    // 3. 必要な次元数が揃っているか確認
-    if (unique_vectors.size() < static_cast<size_t>(n)) {
-        std::cerr << "警告: " << filename << " から " << n << " 個の独立な基底ベクトルを読み込めませんでした。"
-                  << "読み込めたのは " << unique_vectors.size() << " 個です。" << std::endl;
-        // 不足分がある場合、エラーとする
-        throw std::runtime_error("次元不足: 完全な基底行列を作成できませんでした。");
-    }
-
-    // 4. クリーンアップされた基底を B に格納
-    B = Matrix::Zero(n, n); // 初期化
-    for (int i = 0; i < n; i++) {
-        B.row(i) = unique_vectors[i];
-    }
     
-    std::cout << "ファイル読み込みとクリーンアップが完了しました。次元: " << n << std::endl;
+    std::cout << "ファイル読み込みが完了しました。次元: " << n << std::endl;
 }
 
 /* ----------------------------------------------------------------------------
@@ -150,22 +174,38 @@ static void load_and_clean_data(const std::string &filename, int n, Matrix &B){
 */
 
 // グローバル保持することによって途中で終了しても再開できるようにする
-static Scalar Global_best_norm_sq = std::numeric_limits<Scalar>::max(); // 最大値で初期化
-static Matrix Global_B_best;
+static Real Global_best_norm_sq("1e100"); // 十分大きな値
+static IntMatrix Global_B_best;
 
 
-void Progressive_BKZ(const std::string &filename, int n, int start_beta, int max_beta, Scalar delta, double target_norm, int max_retries) {
-    Matrix B(n, n);
+void Progressive_BKZ(const std::string &filename, int n, int start_beta, int max_beta, Real delta, double target_norm, int max_retries) {
+    IntMatrix B(n, n);
     
     // 1. データ読み込み
-    load_and_clean_data(filename, n, B);
+    load_data(filename, n, B);
+    
+#if defined(__linux__)
+    // 1.5 fplll で前処理 BKZ（整数BKZで軽く整形）
+    int preprocess_beta = std::min(n, std::max(start_beta, 20));
+    double preprocess_delta = static_cast<double>(delta);
+    std::cout << "[fplll] BKZ preprocess (beta=" << preprocess_beta << ", delta=" << preprocess_delta << ")..." << std::endl;
+    if (run_fplll_bkz(B, preprocess_beta, preprocess_delta)) {
+        std::cout << "[fplll] preprocess done. ||b1|| = "
+                  << std::sqrt(static_cast<double>(B.row(0).squaredNorm())) << std::endl;
+    } else {
+        std::cerr << "[fplll] preprocess failed. 続行しますが前処理なしになります。" << std::endl;
+    }
+#endif
 
-    // 初期状態表示
-    Scalar current_norm_sq = B.row(0).squaredNorm();
+
+
+    Global_best_norm_sq = B.row(0).cast<Real>().squaredNorm();
+    Global_B_best = B;
+
     std::cout << "--- Initial State ---" << std::endl;
-    std::cout << "||b_1||^2 = " << current_norm_sq << std::endl;
-    std::cout << "||b_1||   = " << std::sqrt(static_cast<double>(current_norm_sq)) << std::endl;
+    std::cout << "||b_1||^2 = " << Global_best_norm_sq << std::endl;
 
+    std::cout << "\n=== Start Progressive BKZ ===" << std::endl;
     // 2. パラメータ設定
 
     auto total_start = std::chrono::high_resolution_clock::now();
@@ -178,7 +218,7 @@ void Progressive_BKZ(const std::string &filename, int n, int start_beta, int max
         std::cout << "\n----------------------------------------" << std::endl;
         std::cout << "[Phase Beta = " << beta << "]" << std::endl;
         
-        Scalar best_norm_sq = B.row(0).squaredNorm();
+        Real best_norm_sq = B.row(0).cast<Real>().squaredNorm();
         int retry_count = 0;
         bool improved_in_phase = false;
 
@@ -191,7 +231,7 @@ void Progressive_BKZ(const std::string &filename, int n, int start_beta, int max
             auto iter_end = std::chrono::high_resolution_clock::now();
             double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(iter_end - iter_start).count() / 1000.0;
 
-            Scalar current_sq = B.row(0).squaredNorm();
+            Real current_sq = B.row(0).cast<Real>().squaredNorm();
             double current_norm = std::sqrt(static_cast<double>(current_sq));
 
             // 進捗表示
@@ -209,8 +249,9 @@ void Progressive_BKZ(const std::string &filename, int n, int start_beta, int max
             if (current_sq < best_norm_sq - 1e-5) { // ここの精度はざっくりでいいので10^{-5} 程度にした
 
                 best_norm_sq = current_sq;
+                Global_best_norm_sq = current_sq;
                 Global_B_best = B;
-                save_current_state(Global_B_best, n, -1, Global_best_norm_sq, "lattice_state_51d"); // ここの 51 は次元を変えるたびに変更したほうがいい
+                save_current_state(Global_B_best, n, -1, Global_best_norm_sq, "lattice_state_40d"); // ここの 40 は次元を変えるたびに変更したほうがいい
             std::cout << "\n!!! NEW GLOBAL RECORD FOUND: " << std::sqrt(static_cast<double>(Global_best_norm_sq)) << " !!!\n";
             
                 best_norm_sq = current_sq;

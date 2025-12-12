@@ -7,7 +7,7 @@
 
 // --- 関数の宣言 (プロトタイプ) ---
 
-void Gram_Schmidt(const Matrix& B, Matrix& B_star, Matrix& U);
+void Gram_Schmidt(const IntMatrix& B, RealMatrix& B_star, RealMatrix& U);
 /**
  * @brief Gram-Schmidt の直交化を実行し、直交基底 B_star と係数行列 U を計算する
  * @param B [in] 入力となる基底行列 (n x m) 各行が基底ベクトル 変更無し

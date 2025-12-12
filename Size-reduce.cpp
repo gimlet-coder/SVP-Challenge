@@ -13,11 +13,11 @@
 #include "Size-reduce.hpp"
 
 // アルゴリズム 4: Size-reduce (完全なサイズ簡約)
-void Size_reduce(Matrix &B, Matrix &U){
+void Size_reduce(IntMatrix &B, RealMatrix &U){
     const int n = B.rows(); // 行列 B の行数を取得して, ベクトルの本数 n として扱う
     if (n < 2){ // 基底ベクトルが1本以下の場合
         if(n > 0){
-            Matrix B_star_temp;
+            RealMatrix B_star_temp;
             Gram_Schmidt(B, B_star_temp, U); // GSOを計算して U を返す
         }else{
             U.resize(0, 0); // 空行列の場合は U も空にする
@@ -25,8 +25,8 @@ void Size_reduce(Matrix &B, Matrix &U){
         return; // サイズ簡約の必要がないので終了
     }
 
-    Matrix B_star; // GSOベクトル及びGSO係数の受け皿
-    Matrix loop_U; // ループ内で用いる一時的なGSO係数行列
+    RealMatrix B_star; // GSOベクトル及びGSO係数の受け皿
+    RealMatrix loop_U; // ループ内で用いる一時的なGSO係数行列
     Gram_Schmidt(B, B_star, loop_U);
     
     // ステップ 2-6: すべての 2 <= i <= n, 1 <= j < i に対して Size-reduce_partial を適用

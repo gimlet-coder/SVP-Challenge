@@ -13,16 +13,10 @@
 
 
 #include "LLL.hpp"
-// LLL基底簡約で隣接するベクトルの交換後のGSO情報を更新する関数 (外部定義)
-void GSOUpdate_LLL_partial(Matrix &U,Vector &B_norm, const int k); 
-// Size-reduce_partial 関数 (外部定義)
-void Size_reduce_partial(Matrix &B, Matrix &U, const int i_in, const int j_in);
-// Gram_Schmidt 関数 (外部定義)
-void Gram_Schmidt(const Matrix &B, Matrix &B_star, Matrix &U);
 
 
 // アルゴリズム 5: LLL 基底簡約アルゴリズム
-void LLL(Matrix &B, const Scalar delta){
+void LLL(IntMatrix &B, const Real delta){
     if(delta <= 0.25 || 1 <= delta){
         throw std::out_of_range("Size-reduce 不正なインデックス delta です (1/4 < delta < 1)");
     }
@@ -31,10 +25,10 @@ void LLL(Matrix &B, const Scalar delta){
     int n = B.rows();
     if(n < 2) return; // 基底が1個以下なら何もせずに終了する
 
-    Matrix B_star, U; // Gram_Schmidt の受け皿
+    RealMatrix B_star, U; // Gram_Schmidt の受け皿
     Gram_Schmidt(B, B_star, U);
 
-    Vector B_norm = B_star.rowwise().squaredNorm(); // // ステップ 2: B_i = ||b*_i||^2 の計算
+    RealVector B_norm = B_star.rowwise().squaredNorm(); // // ステップ 2: B_i = ||b*_i||^2 の計算
     int k_idx = 1; // 0-based index に注意し置き換えた
     while(k_idx < n){ 
         

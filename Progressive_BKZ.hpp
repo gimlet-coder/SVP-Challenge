@@ -9,7 +9,7 @@
 
 
 
-void DeepBKZ(Matrix &B, int beta, const Scalar delta);
+void DeepBKZ(IntMatrix &B, int beta, const Real delta);
 
 /**
  * @brief DeepBKZ基底簡約アルゴリズム

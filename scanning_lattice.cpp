@@ -9,13 +9,13 @@
 #include "lattice_types.hpp"
 
 // ファイルから行列を読み込む関数
-Matrix load_challenge_matrix(const std::string &filename, int rows, int cols) {
+IntMatrix load_challenge_matrix(const std::string &filename, int rows, int cols) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("ファイルを開けませんでした: " + filename);
     }
 
-    Matrix B(rows, cols);
+    IntMatrix B(rows, cols);
     std::string line;
     int row_idx = 0;
 
@@ -31,7 +31,7 @@ Matrix load_challenge_matrix(const std::string &filename, int rows, int cols) {
         // 文字列として数値を取り出し、Scalar 型に変換
         while (ss >> temp_val && col_idx < cols) {
             std::stringstream val_ss(temp_val);
-            Scalar val;
+            Integer val;
             val_ss >> val;
             
             B(row_idx, col_idx) = val;

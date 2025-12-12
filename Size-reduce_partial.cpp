@@ -12,7 +12,7 @@
 #include "Size-reduce_partial.hpp"
 // 上記のヘッダーによって Vector と Matrix は Scalar 型になっている
 
-void Size_reduce_partial(Matrix &B, Matrix &U, const int i, const int j){
+void Size_reduce_partial(IntMatrix &B, RealMatrix &U, const int i, const int j){
     // red_B と red_U を出力したい → B と U を更新して入出力両方に用いる
 
     //i, j が 1 <= j < i <= n を満たしているか確認
@@ -26,12 +26,22 @@ void Size_reduce_partial(Matrix &B, Matrix &U, const int i, const int j){
 
     // --- ここまで引数が条件を満たしているかの確認 ---
 
-    Scalar mu = U(i, j);
-    if(abs(mu) >= Scalar(0.5)){
-        Scalar q = round(mu);
-        B.row(i) -= q * B.row(j);
-        for (int l = 0; l <= j; l++){
-            U(i, l) -= q * U(j, l); // GSO係数の更新
+    Real mu = U(i, j);
+    if(abs(mu) >= 0.5){
+        Integer q = static_cast<Integer>(round(mu));
+
+        // q が 0 なら何もしない
+        if (q != 0) {
+            // 4. 基底 B の更新 (整数演算: Integer同士)
+            B.row(i) -= q * B.row(j);
+            
+            // 5. GSO係数 U の更新 (実数演算: Real同士)
+            // q を Real に戻して計算に使います
+            Real q_real = static_cast<Real>(q);
+            
+            for (int l = 0; l <= j; l++){
+                U(i, l) -= q_real * U(j, l); 
+            }
         }
     }
 }

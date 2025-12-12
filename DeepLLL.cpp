@@ -13,17 +13,10 @@
 
 #include "DeepLLL.hpp"
 
-// Size-reduce_partial 関数 (外部定義)
-void Size_reduce_partial(Matrix &B, Matrix &U, const int i_in, const int j_in);
-// Gram_Schmidt 関数 (外部定義)
-void Gram_Schmidt(const Matrix &B, Matrix &B_star, Matrix &U);
-// DeepLLL基底簡約で隣接するベクトルの交換後のGSO情報を更新する関数 (外部定義)
-void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const int k_in);
-
 
 
 // アルゴリズム 7: DeepLLL 基底簡約アルゴリズム
-void DeepLLL(Matrix &B, const Scalar delta){
+void DeepLLL(IntMatrix &B, const Real delta){
     if(delta <= 0.25 || 1 <= delta){
         throw std::out_of_range("Size_reduce: 不正なパラメータ δ です");
     }
@@ -31,10 +24,10 @@ void DeepLLL(Matrix &B, const Scalar delta){
     int n = B.rows();
     if(n < 2) return; 
 
-    Matrix B_star, U; 
+    RealMatrix B_star, U; 
     Gram_Schmidt(B, B_star, U);
 
-    Vector B_norm = B_star.rowwise().squaredNorm(); // B_i = ||b*_i||^2 step.2
+    RealVector B_norm = B_star.rowwise().squaredNorm(); // B_i = ||b*_i||^2 step.2
 
     int k_idx = 1;
 
@@ -82,7 +75,7 @@ void DeepLLL(Matrix &B, const Scalar delta){
             Size_reduce_partial(B, U, k_idx, j);// Step 6: Size-reduce(k, j)
         }
               
-        Scalar C_scalar = B.row(k_idx).squaredNorm();
+        Real C_scalar = B.row(k_idx).cast<Real>().squaredNorm();
         int i_idx = 0;
 
         while(i_idx < k_idx){       
@@ -90,7 +83,7 @@ void DeepLLL(Matrix &B, const Scalar delta){
                 C_scalar -= U(k_idx, i_idx) * U(k_idx, i_idx) * B_norm(i_idx);
                 i_idx++;
             }else{
-                Vector temp = B.row(k_idx);
+                IntVector temp = B.row(k_idx);
                 for (int j = k_idx; j > i_idx; j--){
                     B.row(j) = B.row(j - 1);
                 }

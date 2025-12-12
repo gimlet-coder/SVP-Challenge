@@ -11,7 +11,7 @@
 
 #include "lattice_types.hpp"
 
-bool ENUM(const Matrix &U, const Vector &B_norm, const Vector &R_squares, Vector &v_out, const int k_begin, const int k_end, long long &node_count){
+bool ENUM(const RealMatrix &U, const RealVector &B_norm, const RealVector &R_squares, IntVector &v_out, const int k_begin, const int k_end, long long &node_count){
     const int n_rows = static_cast<int>(U.rows());
     const int n_cols = static_cast<int>(U.cols());
 
@@ -27,9 +27,9 @@ bool ENUM(const Matrix &U, const Vector &B_norm, const Vector &R_squares, Vector
     const int n = k_end - k_begin + 1;
 
     // Sigma, rho, r のサイズ準備 (インデックスエラー防止のため少し余裕を持つ)
-    Matrix Sigma(n + 2, n + 2);
+    RealMatrix Sigma(n + 2, n + 2);
     Sigma.setZero();
-    Vector rho(n + 2);
+    RealVector rho(n + 2);
     rho.setZero();
     std::vector<int> r(n + 2); // step.2,3: r_0 = 0, r_i = i
     r[0] = 0;
@@ -40,11 +40,11 @@ bool ENUM(const Matrix &U, const Vector &B_norm, const Vector &R_squares, Vector
     node_count = 0;
 
     // v_temp, c, w_int の初期化
-    Eigen::Matrix<long long, Eigen::Dynamic, 1> v_temp(n);
+    IntVector v_temp(n);
     v_temp.setZero();
-    Vector c(n);
+    RealVector c(n);
     c.setZero();
-    Eigen::Matrix<long long, Eigen::Dynamic, 1> w_int(n);
+    IntVector w_int(n);
     w_int.setZero();
 
     int last_nonzero = 1; // step.7
@@ -77,7 +77,8 @@ bool ENUM(const Matrix &U, const Vector &B_norm, const Vector &R_squares, Vector
 
 
         const int global_k = k + k_begin - 1;
-        Scalar diff = static_cast<Scalar>(v_temp(k - 1)) - c(k - 1);
+        Real v_val = static_cast<Real>(v_temp(k - 1));
+        Real diff = v_val - c(k - 1);
 
         rho(k) = rho(k + 1) + diff * diff * B_norm(global_k); // step.10
 
@@ -93,12 +94,12 @@ bool ENUM(const Matrix &U, const Vector &B_norm, const Vector &R_squares, Vector
                     }
                 }
                 if (!all_zero) { // 非零ベクトル発見
-                    v_out = v_temp.cast<Scalar>();
+                    v_out = v_temp;
 std::cerr << "\n見つかったノルム: " << R_squares(k - 1) << " (Nodes: " << node_count << ")" << std::endl;
                     return true;
                 }
                 // 0 ベクトルなら次の候補へ step.33 ~ 38 と同じ処理を行う
-                if (v_temp(k - 1) > c(k - 1)){
+                if (static_cast<Real>(v_temp(k - 1)) > c(k - 1)){
                     v_temp(k - 1) += w_int(k - 1);
                 }else{
                     v_temp(k - 1) -= w_int(k - 1);
@@ -113,12 +114,13 @@ std::cerr << "\n見つかったノルム: " << R_squares(k - 1) << " (Nodes: " <
             for (int i_local = r[k]; i_local >= k + 1; i_local--) {
                 int g_i = i_local + k_begin - 1;
                 int g_k = k + k_begin - 1;
-                Sigma(i_local, k - 1) = Sigma(i_local + 1, k - 1) + static_cast<Scalar>(v_temp(i_local - 1)) * U(g_i, g_k);
+                Real v_comp = static_cast<Real>(v_temp(i_local - 1));
+                Sigma(i_local, k - 1) = Sigma(i_local + 1, k - 1) + v_comp * U(g_i, g_k);
             }
             // step.20-23: c_k, v_k, w_k の設定
             c(k - 1) = -Sigma(k + 1, k - 1);
-            Scalar rounded_c_k = boost::multiprecision::round(c(k - 1));
-            v_temp(k - 1) = static_cast<long long>(rounded_c_k);
+            Real rounded_c_k = round(c(k - 1));
+            v_temp(k - 1) = static_cast<Integer>(rounded_c_k);
             w_int(k - 1) = 1;
         } else { // rho(k) > R_square
             k++; // step.24
@@ -133,7 +135,7 @@ std::cerr << "\n見つかったノルム: " << R_squares(k - 1) << " (Nodes: " <
                 v_temp(k - 1) += 1; // step.31: v_k <- v_k + 1
                 w_int(k - 1) = 1; // w をリセット
             }else{
-                if (v_temp(k - 1) > c(k - 1)){ // step.32-38: 交互にずらしながら探索
+                if (static_cast<Real>(v_temp(k - 1)) > c(k - 1)){ // step.32-38: 交互にずらしながら探索
                 v_temp(k - 1) -= w_int(k - 1); // step.34
                 }else{
                     v_temp(k - 1) += w_int(k - 1); // step.36

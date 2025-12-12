@@ -8,8 +8,9 @@
 #include <stdexcept> // std::out_of_range のために必要
 
 #include <random> // 10^7 以上の疑似乱数を生成するために必要
-
-#include <windows.h> //　文字化け対策
+#ifdef _WIN32
+#include <windows.h> // 文字化け対策 (Windows 専用)
+#endif
 #include <iomanip> // 表示桁数を確保するのに使う std::fixed << std::setprecision(0)
 #include <chrono> // 計算時間計測するために使う
 
@@ -20,23 +21,40 @@
 
 #include "main.hpp"
 
+const std::string FILE_NAME = "lattice.txt"; // スクリプトが出力するファイル名と合わせる
+
+const int DIM = 40; // 次元を入力
+
+const int MAX_BETA = 40;
+const Real DELTA = 0.999;
+const double TARGET_NORM = 2100.0; // 64次元の一番下の記録よりは超えたい
 
 #if 1
 
-int main(){
+int main(int argc, char* argv[]){
+#ifdef _WIN32
     SetConsoleOutputCP(65001);
+#endif
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
 
-    int n = 51;
-    std::string filename = "lattice_file.txt";
+    int start_beta = 40; // コマンドライン引数がない場合のデフォルト値
+    int max_retries = 5;
 
-    int start_beta = 20;
-    int max_data = 51;
-    Scalar delta = 0.999;
-    double target_norm = 1589;
-    int max_retries = 10;
-    Progressive_BKZ(filename, n, start_beta, max_data, delta, target_norm, max_retries);
+    if (argc > 1){
+        start_beta = std::stoi(argv[1]);
+    }
+    if (argc > 2){
+        max_retries = std::stoi(argv[2]);
+    }
+
+    try {
+        Progressive_BKZ(FILE_NAME, DIM, start_beta, MAX_BETA, DELTA, TARGET_NORM, max_retries);
+    } catch (const std::exception& e) {
+        std::cerr << "エラーが発生しました: " << e.what() << std::endl;
+        return 1;
+    }
+
     return 0;
 }
 
@@ -46,7 +64,9 @@ int main(){
 #if 0
 // BKZの動作確認
 int main(){
+#ifdef _WIN32
     SetConsoleOutputCP(65001);
+#endif
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
 
@@ -95,7 +115,9 @@ int main(){
 #if 0
 
 int main() {
+#ifdef _WIN32
     SetConsoleOutputCP(65001);
+#endif
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(NULL);
 
@@ -167,4 +189,3 @@ int main() {
     return 0;
 }
 #endif
-

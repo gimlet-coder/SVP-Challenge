@@ -10,9 +10,9 @@
 // 上記のヘッダーによって Vector と Matrix は Scalar 型になっている
 
 // アルゴリズム 2: Lagrange 基底簡約アルゴリズム
-Matrix Lag_basis_red(const Matrix& L){
+IntMatrix Lag_basis_red(const IntMatrix& L){
 
-    Matrix Lag_L = L; 
+    IntMatrix Lag_L = L; 
     
     // --- ステップ 1-3: ||b_1|| <= ||b_2|| を満たすように交換 ---
     if(Lag_L.rows() < 2) return Lag_L; // 2次元未満ならそのまま返す
@@ -25,12 +25,15 @@ Matrix Lag_basis_red(const Matrix& L){
     // --- ステップ 4-7: do-while ループ ---
     do{
         // ステップ 5: q = -[<b_1, b_2> / ||b_1||^2] を計算
-        Scalar frac = -Lag_L.row(0).dot(Lag_L.row(1)) / Lag_L.row(0).squaredNorm();
-        int q = static_cast<int>(std::round(frac.template convert_to<long double>()));
+        Real dot_val = static_cast<Real>(Lag_L.row(0).dot(Lag_L.row(1)));
+        Real norm_val = static_cast<Real>(Lag_L.row(0).squaredNorm());
+        
+        Real frac = -dot_val / norm_val;
+
+        Integer q = static_cast<Integer>(round(frac));
         
         // v <- b_2 + q * b_1 を計算
-        Vector v = Lag_L.row(1) + (static_cast<typename Matrix::Scalar>(q)) * Lag_L.row(0);
-        
+        IntVector v = Lag_L.row(1) + q * Lag_L.row(0);
         // ステップ 6: 基底の取り直し (b_2 <- b_1, b_1 <- v)
         // Lag_L.row(1) には元の b_1、Lag_L.row(0) には新しい v が入る
         Lag_L.row(1).swap(Lag_L.row(0)); // b_1 と b_2 の位置を入れ替える

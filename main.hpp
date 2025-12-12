@@ -7,7 +7,7 @@
 
 // --- 関数の宣言 (プロトタイプ) ---
 
-void Gram_Schmidt(const Matrix& B, Matrix& B_star, Matrix& U);
+void Gram_Schmidt(const IntMatrix& B, RealMatrix& B_star, RealMatrix& U);
 /**
  * @brief Gram-Schmidt の直交化を実行し、直交基底 B_star と係数行列 U を計算する
  * @param B [in] 入力となる基底行列 (n x m) 各行が基底ベクトル 変更無し
@@ -16,7 +16,7 @@ void Gram_Schmidt(const Matrix& B, Matrix& B_star, Matrix& U);
  *  μ_{i, j} が U(i - 1, j - 1) (i > j) に格納されることに注意 (0-based index)
  */
 
-void Size_reduce_partial(Matrix &B, Matrix &U, const int i,const int j);
+void Size_reduce_partial(IntMatrix &B, RealMatrix &U, const int i, const int j);
 
 /**
  * @brief アルゴリズム3に基づいて (i, j) 要素 において部分的にサイズ基底簡約をする
@@ -26,7 +26,7 @@ void Size_reduce_partial(Matrix &B, Matrix &U, const int i,const int j);
  * @param i, j [in] 更新対象の行インデックス (0-based) i > j である必要あり 変更無し
  */
 
-void GSOUpdate_LLL_partial(Matrix &U, Vector &B_norm, const int k);
+void GSOUpdate_LLL_partial(RealMatrix &U, RealVector &B_norm, const int k);
 
  /**
   * @brief アルゴリズム6に基づいて k における LLL内のGSO情報を更新する
@@ -37,7 +37,7 @@ void GSOUpdate_LLL_partial(Matrix &U, Vector &B_norm, const int k);
   * @param k [in] 交換させるインデックス 2 <= k <= n に注意  変更無し
   */
 
-void LLL(Matrix &B, const Scalar delta);
+void LLL(IntMatrix &B, const Real delta);
 
 /**
  * @brief LLL基底簡約アルゴリズム
@@ -46,7 +46,7 @@ void LLL(Matrix &B, const Scalar delta);
  * @param delta [in] LLLにおける簡約パラメータ 変更無し
  */
 
-void DeepLLL(Matrix &B, const Scalar delta);
+void DeepLLL(IntMatrix &B, const Real delta);
 
 /**
  * @brief DeepLLL基底簡約アルゴリズム
@@ -55,8 +55,7 @@ void DeepLLL(Matrix &B, const Scalar delta);
  * @param delta [in] DeepLLLにおける簡約パラメータ 変更無し
  */
 
-void MLLL(Matrix &B, const Scalar delta);
-
+void MLLL(IntMatrix &B, const Real delta);
 /**
  * @brief MLLL基底簡約アルゴリズム
  * @param B [in, out] n次元格子 L の基底 B
@@ -64,7 +63,7 @@ void MLLL(Matrix &B, const Scalar delta);
  * @param delta [in] MLLLにおける簡約パラメータ 変更無し
  */
 
- bool ENUM(const Matrix &U, const Vector &B_norm, Scalar &R_square , Vector &v_out, const int k_begin, const int k_end, long long &node_count);
+bool ENUM(const RealMatrix &mu, const RealVector &B_norm, Real &R_square, IntVector &v_out, const int k_begin, const int k_end, long long &node_count);
 
  /** 
   * @brief 格子上の最短ベクトルの数え上げ ENUM 
@@ -80,7 +79,7 @@ void MLLL(Matrix &B, const Scalar delta);
   */
 
 
-void BKZ(Matrix &B, int beta, const Scalar delta);
+void BKZ(IntMatrix &B, int beta, const Real delta);
 
 /**
  * @brief BKZ基底簡約アルゴリズム
@@ -88,8 +87,7 @@ void BKZ(Matrix &B, int beta, const Scalar delta);
  * @param delta [in] LLLの簡約パラメータ (1/4 < delta < 1) 変更無し
  */
 
-void Progressive_BKZ(const std::string& filename, int n, int start_beta, int max_beta, Scalar delta, double target_norm, int max_retries);
-
+void Progressive_BKZ(const std::string& filename, int n, int start_beta, int max_beta, Real delta, double target_norm, int max_retries);
 /**
  * @brief ProgressiveBKZアルゴリズム
  * @param filename [in] 読み込ませたい行列のファイル名を入れる 変更無し

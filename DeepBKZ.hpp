@@ -8,7 +8,7 @@
 
 
 
-void Gram_Schmidt(const Matrix& B, Matrix& B_star, Matrix& U);
+void Gram_Schmidt(const IntMatrix& B, RealMatrix& B_star, RealMatrix& U);
 /**
  * @brief Gram-Schmidt の直交化を実行し、直交基底 B_star と係数行列 U を計算する
  * @param B [in] 入力となる基底行列 (n x m) 各行が基底ベクトル 変更無し
@@ -17,7 +17,7 @@ void Gram_Schmidt(const Matrix& B, Matrix& B_star, Matrix& U);
  *  μ_{i, j} が U(i - 1, j - 1) (i > j) に格納されることに注意 (0-based index)
  */
 
-void LLL(Matrix &B, const Scalar delta);
+void LLL(IntMatrix &B, const Real delta);
 
 /**
  * @brief LLL基底簡約アルゴリズム
@@ -26,7 +26,7 @@ void LLL(Matrix &B, const Scalar delta);
  * @param delta [in] LLLにおける簡約パラメータ 変更無し
  */
 
-void DeepLLL(Matrix &B, const Scalar delta);
+void DeepLLL(IntMatrix &B, const Real delta);
 
 /**
  * @brief DeepLLL基底簡約アルゴリズム
@@ -35,7 +35,7 @@ void DeepLLL(Matrix &B, const Scalar delta);
  * @param delta [in] LLLにおける簡約パラメータ 変更無し
  */
 
- void MLLL(Matrix &B, const Scalar delta);
+ void MLLL(IntMatrix &B, const Real delta);
 
 /**
  * @brief MLLL基底簡約アルゴリズム
@@ -44,7 +44,7 @@ void DeepLLL(Matrix &B, const Scalar delta);
  * @param delta [in] MLLLにおける簡約パラメータ 変更無し
  */
 
- bool ENUM(const Matrix &U, const Vector &B_norm, const Vector &R_squares , Vector &v_out, const int k_begin, const int k_end, long long &node_count);
+bool ENUM(const RealMatrix &U, const RealVector &B_norm, const RealVector &R_squares, IntVector &v_out, const int k_begin, const int k_end, long long &node_count);
 
  /** 
   * @brief 格子上の最短ベクトルの数え上げ ENUM 
@@ -59,7 +59,7 @@ void DeepLLL(Matrix &B, const Scalar delta);
   * @param node_count [out] 最短ベクトルを探すのにかかったノード数を保存する
   */
 
-bool ENUM_fast(const Matrix &U, const Vector &B_norm, const Vector &R_squares, Vector &v_out, const int k_begin, const int k_end, long long &node_count);
+bool ENUM_fast(const RealMatrix &U, const RealVector &B_norm, const RealVector &R_squares, IntVector &v_out, const int k_begin, const int k_end, long long &node_count);
 
 /**
  * @brief ENUMの内部計算を Scalar から long double に変えたもの

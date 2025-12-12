@@ -9,7 +9,7 @@
 
 #include "lattice_types.hpp"
 // 上記のヘッダーによって Vector と Matrix は Scalar 型になっている
-void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const int k_in){
+void GSOUpdate_DeepLLL_partial(RealMatrix &U, RealVector &B_norm, const int i_in, const int k_in){
     // i_in, k_in は 1-based index (教科書の表記に合わせる)
     int n = U.rows();
     if(i_in < 1 || k_in <= i_in || n < k_in ){
@@ -18,7 +18,7 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
     const int i = i_in - 1, k = k_in - 1; // 0-based index に変換
     
     // P, D ベクトルの計算に必要な初期化
-    Vector P(n), D(n); 
+    RealVector P(n), D(n); 
 
     // --- ステップ 1-5: P_j と D_j (||pi_j(b_k)||^2) の計算 (補題 2.4.2) ---
     D(k) = B_norm(k); // D_k = ||pi_k(b_k)||^2 = ||b_k^*||^2 = B_k
@@ -29,13 +29,13 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
         D(j) = D(j + 1) + U(k, j) * P(j); // D_j = ||pi_j(b_k)||^2
     }
     
-    Vector S(n); // S_l = sum_{s=j}^{k} nu_s * mu_{l,s} * B_s (補題 2.4.3(1)の計算用)
+    RealVector S(n); // S_l = sum_{s=j}^{k} nu_s * mu_{l,s} * B_s (補題 2.4.3(1)の計算用)
     S.setZero(); 
 
     // --- ステップ 13-14: U(l, j) の更新 (j > i) (補題 2.4.3(1) の後半) ---
     for (int j = k; j >= i + 1; j--){
         // T = mu_{k,j-1} / D_j。 Deep Insertion 前は mu_{k,j-1} は存在しないので 0
-        Scalar T;
+        Real T;
         if(j - 1 >= 0) {
             T = U(k, j - 1) / D(j);
         }
@@ -52,7 +52,7 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
         // k >= l > j の更新 (l = k から j + 1)
         for (int l = k; l >= j + 1; l--){
 
-            Scalar mu_val;
+            Real mu_val;
 
             if(l - 1 == j){
                 mu_val = 1;
@@ -67,7 +67,7 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
     
     // --- ステップ 16-23: mu_l,i の更新 (補題 2.4.3(2)) ---
     
-    Scalar T = 1.0 / D(i);
+    Real T = 1.0 / D(i);
 
     // l > k の更新 (l = n - 1 から k + 1)
     for (int l = n - 1; l >= k + 1; l--){
@@ -83,7 +83,7 @@ void GSOUpdate_DeepLLL_partial(Matrix &U, Vector &B_norm, const int i_in, const 
 
     // --- ステップ 24-30: mu_l,j のシフト (j < i) (補題 2.4.3(3), (4)) ---
     for (int j = 0; j < i; j++){
-        Scalar temp = U(k, j);
+        Real temp = U(k, j);
         for (int l = k; l >= i + 1; l--){
             U(l, j) = U(l - 1, j);
         }

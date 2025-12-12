@@ -13,7 +13,7 @@
 
 using FastScalar = long double; // Scalar 型ですべて演算を行っていたものを必要に応じて long double に落とし込むことで高速化
 
-bool ENUM_fast(const Matrix &U, const Vector &B_norm, const Vector &R_squares, Vector &v_out, const int k_begin, const int k_end, long long &node_count){
+bool ENUM_fast(const RealMatrix &U, const RealVector &B_norm, const RealVector &R_squares, IntVector &v_out, const int k_begin, const int k_end, long long &node_count){
     
     const int n_rows = static_cast<int>(U.rows());
     const int n_cols = static_cast<int>(U.cols());
@@ -29,7 +29,7 @@ bool ENUM_fast(const Matrix &U, const Vector &B_norm, const Vector &R_squares, V
     Eigen::Matrix<FastScalar, Eigen::Dynamic, Eigen::Dynamic> U_fast = U.cast<FastScalar>();
     Eigen::Matrix<FastScalar, Eigen::Dynamic, 1> B_norm_fast = B_norm.cast<FastScalar>();
     Eigen::Matrix<FastScalar, Eigen::Dynamic, 1> R_squares_fast = R_squares.cast<FastScalar>();
-    // それぞれ Scalar から FastScalar (= long double) に一旦型変換
+    // それぞれ Real から FastScalar (= long double) に一旦型変換
 
     const int n = k_end - k_begin + 1;
 
@@ -100,7 +100,7 @@ bool ENUM_fast(const Matrix &U, const Vector &B_norm, const Vector &R_squares, V
                     }
                 }
                 if (!all_zero) { // 非零ベクトル発見
-                    v_out = v_temp.cast<Scalar>();
+                    v_out = v_temp.cast<Integer>();
 std::cerr << "\n見つかったノルム: " << R_squares(k - 1) << " (Nodes: " << node_count << ")" << std::endl;
                     return true;
                 }

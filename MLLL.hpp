@@ -6,7 +6,7 @@
 #include "lattice_types.hpp"
 // --- 関数の宣言 (プロトタイプ) ---
 
-void Gram_Schmidt(const Matrix& B, Matrix& B_star, Matrix& U);
+void Gram_Schmidt(const IntMatrix& B, RealMatrix& B_star, RealMatrix& U);
 /**
  * @brief Gram-Schmidt の直交化を実行し、直交基底 B_star と係数行列 U を計算する
  * @param B [in] 入力となる基底行列 (n x m) 各行が基底ベクトル 変更無し
@@ -15,7 +15,7 @@ void Gram_Schmidt(const Matrix& B, Matrix& B_star, Matrix& U);
  *  μ_{i, j} が U(i - 1, j - 1) (i > j) に格納されることに注意 (0-based index)
  */
 
-void Size_reduce_partial(Matrix &B, Matrix &U, const int i,const int j);
+void Size_reduce_partial(IntMatrix &B, RealMatrix &U, const int i,const int j);
 
 /**
  * @brief アルゴリズム3に基づいて (i, j) 要素 において部分的にサイズ基底簡約をする
